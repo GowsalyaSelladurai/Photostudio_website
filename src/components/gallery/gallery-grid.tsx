@@ -29,8 +29,8 @@ export function GalleryGrid() {
             onClick={() => setCategory(item)}
             className={`rounded-full border px-4 py-2 text-sm transition-colors ${
               category === item
-                ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-white"
-                : "border-[var(--color-line)] bg-white text-[var(--color-muted)] hover:border-[var(--color-ink)]"
+              ? "border-[var(--studio-champagne-gold)] bg-[var(--studio-champagne-gold)] font-semibold text-[var(--studio-midnight-black)]"
+              : "border-[var(--color-line)] bg-[var(--studio-ivory-white)] text-[var(--color-muted)] hover:border-[var(--studio-champagne-gold)]"
             }`}
           >
             {item}
@@ -45,7 +45,7 @@ export function GalleryGrid() {
             onClick={() => setSelectedImage(image)}
             className="group text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-clay)]"
           >
-            <span className="relative block aspect-[4/5] overflow-hidden rounded-xl bg-[var(--color-sand)]">
+            <span className="premium-card relative block aspect-[4/5] overflow-hidden rounded-xl">
               <Image
                 src={image.image}
                 alt={image.alt}

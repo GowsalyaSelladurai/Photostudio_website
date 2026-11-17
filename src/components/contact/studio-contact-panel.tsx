@@ -4,7 +4,7 @@ export function StudioContactPanel() {
   const { contact } = studioConfig;
 
   return (
-    <div className="rounded-3xl border border-[var(--color-line)] bg-white p-6 sm:p-8">
+    <div className="premium-card rounded-3xl p-6 sm:p-8">
       <dl className="grid gap-6 sm:grid-cols-2">
         <div>
           <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
@@ -27,12 +27,14 @@ export function StudioContactPanel() {
             {contact.detailsLabels.email}
           </dt>
           <dd className="mt-2 text-sm text-[var(--color-ink)]">
-            <a
-              href={`mailto:${contact.email}`}
-              className="underline decoration-[var(--color-line)] underline-offset-4 hover:text-[var(--color-clay)]"
-            >
-              {contact.email}
-            </a>
+            {contact.email.trim() ? (
+              <a
+                href={`mailto:${contact.email}`}
+                className="underline decoration-[var(--color-line)] underline-offset-4 hover:text-[var(--studio-midnight-black)] hover:decoration-[var(--studio-champagne-gold)]"
+              >
+                {contact.email}
+              </a>
+            ) : "Not provided"}
           </dd>
         </div>
         <div>
@@ -40,23 +42,27 @@ export function StudioContactPanel() {
             {contact.detailsLabels.phone}
           </dt>
           <dd className="mt-2 text-sm text-[var(--color-ink)]">
-            <a
-              href={`tel:${contact.phoneHref}`}
-              className="underline decoration-[var(--color-line)] underline-offset-4 hover:text-[var(--color-clay)]"
-            >
-              {contact.phoneDisplay}
-            </a>
+            {contact.phoneHref.trim() ? (
+              <a
+                href={`tel:${contact.phoneHref}`}
+                className="underline decoration-[var(--color-line)] underline-offset-4 hover:text-[var(--studio-midnight-black)] hover:decoration-[var(--studio-champagne-gold)]"
+              >
+                {contact.phoneDisplay}
+              </a>
+            ) : "Not provided"}
           </dd>
         </div>
       </dl>
-      <a
-        href={contact.whatsappHref}
-        target="_blank"
-        rel="noreferrer"
-        className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--color-line)] px-5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-clay)] hover:text-[var(--color-clay)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-clay)]"
-      >
-        {contact.detailsLabels.whatsapp}
-      </a>
+      {contact.whatsappHref.trim() ? (
+        <a
+          href={contact.whatsappHref}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--studio-champagne-gold)] px-5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--studio-champagne-gold)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--studio-champagne-gold)]"
+        >
+          {contact.detailsLabels.whatsapp}
+        </a>
+      ) : null}
       <p className="mt-4 text-xs text-[var(--color-muted)]">
         {contact.placeholderNote}
       </p>
@@ -77,7 +83,7 @@ export function GoogleMapsPlaceholder() {
         <span className="absolute left-[64%] top-[-15%] h-[140%] w-7 -rotate-[32deg] rounded-full border-x border-white/80" />
         <span className="absolute left-[-10%] top-[36%] h-5 w-[120%] -rotate-[8deg] rounded-full border-y border-white/80" />
         <span className="absolute left-[-10%] top-[72%] h-7 w-[120%] rotate-[7deg] rounded-full border-y border-white/80" />
-        <span className="absolute left-[49%] top-[35%] grid h-12 w-12 place-items-center rounded-full bg-[var(--color-clay)] text-2xl text-white shadow-lg">
+        <span className="absolute left-[49%] top-[35%] grid h-12 w-12 place-items-center rounded-full bg-[var(--studio-champagne-gold)] text-2xl text-[var(--studio-midnight-black)] shadow-lg">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"

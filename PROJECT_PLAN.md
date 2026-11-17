@@ -2,7 +2,7 @@
 
 ## Status and scope
 
-**Status:** Version 1 foundation, homepage, booking flow, About and Contact pages, and enquiry persistence are implemented; booking and enquiry persistence were verified against an isolated PostgreSQL test cluster; target database configuration, remaining public pages, and production policies remain pending.  
+**Status:** Version 1 public pages and the responsive luxury theme are implemented; booking and enquiry persistence were previously verified against an isolated PostgreSQL test cluster; target database configuration and production policies remain pending. TypeScript, lint, focused tests, responsive browser checks, and the production build passed for the theme update.  
 **Current scope:** Version 1 public photography-studio website.  
 **Out of scope now:** Version 2 admin portal, customer accounts, cart/checkout, orders, uploads, notifications, and management modules.
 
@@ -40,11 +40,12 @@ The PDF calls V1 a fast, zero-reload client-side SPA. App Router client-side nav
 ### Phase 2 — Public content pages
 
 - [x] Build the Home page with responsive navigation, configured hero slides, featured services/gallery, testimonials, offer and social placeholders, and contact actions.
-- [ ] Complete Gallery, Services, Frames, Albums, Privacy Policy, and Terms views.
+- [x] Apply the approved five-color luxury theme through shared CSS/Tailwind tokens, reusable cards/forms, responsive header/footer, and configurable contact actions.
+- [x] Complete Gallery, Services, Frames, Albums, Privacy Policy, and Terms views.
 - [x] Build separate About and Contact pages with configurable studio story, approach, sample team, contact details, opening hours, WhatsApp, and a Maps placeholder.
 - [x] Add gallery category filtering, shared photo lightbox, and Before/After slider.
-- [ ] Complete responsive presentation across the remaining public pages.
-- Add catalogue download and call/WhatsApp actions using approved targets.
+- [x] Complete responsive presentation across the remaining public pages.
+- [x] Add catalogue download and call/WhatsApp actions using configured demo targets.
 - Connect services to Booking with the selected service carried into the form where approved.
 
 ### Phase 3 — Pricing and booking experience

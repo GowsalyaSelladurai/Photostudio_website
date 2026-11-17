@@ -30,36 +30,49 @@ export function PricingConfigurator({ kind }: { kind: ConfiguratorKind }) {
   }, 0);
 
   return (
-    <div className="rounded-3xl border border-[var(--color-line)] bg-white p-6 sm:p-9">
-      <div className="grid gap-6 sm:grid-cols-2">
+    <div className="premium-card rounded-3xl p-6 sm:p-9">
+      <div className="grid gap-7 md:grid-cols-3">
         {groups.map((group) => (
-          <label key={group.label} className="block">
-            <span className="mb-2 block text-sm font-semibold text-[var(--color-ink)]">
+          <fieldset key={group.label} className="min-w-0">
+            <legend className="mb-3 text-sm font-semibold text-[var(--color-ink)]">
               {group.label}
-            </span>
-            <select
-              value={selected[group.label]}
-              onChange={(event) =>
-                setSelected((current) => ({
-                  ...current,
-                  [group.label]: event.target.value,
-                }))
-              }
-              className="min-h-12 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-clay)] focus:ring-2 focus:ring-[var(--color-clay)]/20"
-            >
+            </legend>
+            <div className="grid gap-2">
               {group.options.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={selected[group.label] === option.id}
+                  onClick={() =>
+                    setSelected((current) => ({
+                      ...current,
+                      [group.label]: option.id,
+                    }))
+                  }
+                  className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors focus-visible:outline ${
+                    selected[group.label] === option.id
+                      ? "border-[var(--studio-champagne-gold)] bg-[var(--studio-warm-beige)] text-[var(--studio-midnight-black)] shadow-sm"
+                      : "border-[var(--color-line)] bg-[var(--studio-ivory-white)] text-[var(--studio-deep-charcoal)] hover:border-[var(--studio-champagne-gold)]"
+                  }`}
+                >
+                  <span>{option.label}</span>
+                  <span className="shrink-0 text-xs font-semibold">
+                    {option.amount ? `+ ${formatPrice(option.amount)}` : "Included"}
+                  </span>
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </fieldset>
         ))}
       </div>
       <div className="mt-8 flex flex-wrap items-end justify-between gap-4 border-t border-[var(--color-line)] pt-6">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--color-muted)]">Demo estimate</p>
-          <p className="mt-1 font-serif text-4xl text-[var(--color-ink)]">{formatPrice(total)}</p>
+          <p className="inline-flex rounded-full bg-[var(--studio-champagne-gold)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--studio-midnight-black)]">
+            Demo estimate
+          </p>
+          <p aria-live="polite" className="mt-2 font-serif text-4xl text-[var(--color-ink)]">
+            {formatPrice(total)}
+          </p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             Sample {studioConfig.currency} prices for demonstration only.
           </p>

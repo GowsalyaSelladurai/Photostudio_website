@@ -41,10 +41,10 @@ export function HeroCarousel() {
             {studioConfig.description}
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
-            <Link href="/booking" className="rounded-full bg-[var(--color-paper)] px-6 py-3.5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:bg-white">
+            <Link href="/booking" className="rounded-full bg-[var(--studio-champagne-gold)] px-6 py-3.5 text-sm font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)]">
               {studioConfig.hero.bookingLinkLabel}
             </Link>
-            <Link href="/gallery" className="rounded-full border border-white/60 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+            <Link href="/gallery" className="rounded-full border border-[var(--studio-champagne-gold)] px-6 py-3.5 text-sm font-semibold text-[var(--studio-ivory-white)] transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]">
               {studioConfig.hero.galleryLinkLabel}
             </Link>
           </div>
@@ -53,8 +53,8 @@ export function HeroCarousel() {
           <span aria-live="polite" className="mr-2 text-xs tracking-[0.15em] text-white/70">
             0{activeIndex + 1} / 0{slides.length}
           </span>
-          <button type="button" onClick={() => showSlide(-1)} aria-label="Previous featured image" className="h-11 w-11 rounded-full border border-white/60 text-lg transition-colors hover:bg-white/15">←</button>
-          <button type="button" onClick={() => showSlide(1)} aria-label="Next featured image" className="h-11 w-11 rounded-full border border-white/60 text-lg transition-colors hover:bg-white/15">→</button>
+          <button type="button" onClick={() => showSlide(-1)} aria-label="Previous featured image" className="h-11 w-11 rounded-full border border-[var(--studio-champagne-gold)] text-lg transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]">←</button>
+          <button type="button" onClick={() => showSlide(1)} aria-label="Next featured image" className="h-11 w-11 rounded-full border border-[var(--studio-champagne-gold)] text-lg transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]">→</button>
         </div>
       </div>
     </section>

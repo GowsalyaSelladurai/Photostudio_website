@@ -62,7 +62,7 @@ export default function AboutPage() {
             {about.approach.principles.map((principle, index) => (
               <article
                 key={principle.title}
-                className="rounded-2xl border border-[var(--color-line)] bg-white p-6 sm:p-7"
+                className="premium-card rounded-2xl p-6 sm:p-7"
               >
                 <p className="font-serif text-2xl text-[var(--color-clay)]">
                   0{index + 1}
@@ -89,7 +89,7 @@ export default function AboutPage() {
           {about.team.members.map((member) => (
             <article
               key={member.name}
-              className="overflow-hidden rounded-3xl border border-[var(--color-line)] bg-white"
+              className="premium-card overflow-hidden rounded-3xl"
             >
               <div className="relative aspect-[4/5] bg-[var(--color-sand)]">
                 <Image

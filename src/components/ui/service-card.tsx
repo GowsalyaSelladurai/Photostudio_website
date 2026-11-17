@@ -4,7 +4,7 @@ import { formatPrice } from "@/lib/format";
 
 export function ServiceCard({ service }: { service: Service }) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-[var(--color-line)] bg-white p-6 transition-transform hover:-translate-y-1">
+    <article className="premium-card flex h-full flex-col rounded-2xl p-6">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-clay)]">
         {service.category}
       </p>
@@ -24,19 +24,19 @@ export function ServiceCard({ service }: { service: Service }) {
           </li>
         ))}
       </ul>
-      <div className="mt-6 flex items-end justify-between border-t border-[var(--color-line)] pt-5">
+      <div className="mt-6 flex items-end justify-between gap-3 border-t border-[var(--color-line)] pt-5">
         <p className="text-sm text-[var(--color-muted)]">
           From{" "}
-          <span className="font-semibold text-[var(--color-ink)]">
+          <span className="inline-flex rounded-full bg-[var(--studio-champagne-gold)] px-2.5 py-1 font-semibold text-[var(--studio-midnight-black)]">
             {formatPrice(service.startingPrice)}
           </span>
-          <span className="ml-1 text-xs">          · demo</span>
+          <span className="ml-1 text-xs">· demo</span>
         </p>
         <Link
           href={`/booking?shootType=${encodeURIComponent(service.category)}`}
-          className="text-sm font-semibold text-[var(--color-clay)] underline-offset-4 hover:underline"
+          className="inline-flex min-h-10 shrink-0 items-center rounded-full bg-[var(--studio-champagne-gold)] px-4 text-sm font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)]"
         >
-          Book now
+          Book Now
         </Link>
       </div>
     </article>

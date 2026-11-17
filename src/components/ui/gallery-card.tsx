@@ -15,7 +15,7 @@ export function GalleryCard({
       aria-label={`View ${image.title}, ${image.category} photograph`}
       className="group block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-clay)]"
     >
-      <span className="relative block aspect-[4/5] overflow-hidden rounded-xl bg-[var(--color-sand)]">
+      <span className="premium-card relative block aspect-[4/5] overflow-hidden rounded-xl">
         <Image
           src={image.image}
           alt={image.alt}

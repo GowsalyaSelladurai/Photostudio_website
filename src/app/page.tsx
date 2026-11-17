@@ -99,14 +99,14 @@ export default function Home() {
 
       <InstagramPreview />
 
-      <section className="bg-[var(--color-ink)] px-5 py-20 text-center text-white sm:px-8 lg:py-24">
+      <section className="bg-[var(--studio-deep-charcoal)] px-5 py-20 text-center text-[var(--studio-ivory-white)] sm:px-8 lg:py-24">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/60">
           {content.closing.eyebrow}
         </p>
         <h2 className="mx-auto mt-4 max-w-2xl font-serif text-4xl leading-tight sm:text-5xl">
           {content.closing.title}
         </h2>
-        <ButtonLink href="/booking" variant="light" className="mt-8">
+        <ButtonLink href="/booking" className="mt-8">
           {content.closing.linkLabel}
         </ButtonLink>
       </section>

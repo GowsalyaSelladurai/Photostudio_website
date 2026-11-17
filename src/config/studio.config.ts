@@ -191,6 +191,10 @@ export const studioConfig = {
       anotherMessageLabel: "Send another message",
     },
     instagramUrl: "https://www.instagram.com/",
+    socialLinks: [
+      { name: "Instagram · demo link", href: "https://www.instagram.com/" },
+      { name: "Facebook · demo link", href: "https://www.facebook.com/" },
+    ],
   },
   hero: {
     slides: [

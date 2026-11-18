@@ -69,7 +69,7 @@ export function EnquiryForm() {
     return (
       <section
         aria-labelledby="enquiry-success-title"
-        className="premium-card rounded-3xl p-7 sm:p-9"
+        className="rounded-3xl border border-[var(--color-line)] bg-white p-7 sm:p-9"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-clay)]">
           {enquiry.successEyebrow}
@@ -102,7 +102,7 @@ export function EnquiryForm() {
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="premium-card space-y-5 rounded-3xl p-6 sm:p-9"
+      className="space-y-5 rounded-3xl border border-[var(--color-line)] bg-white p-6 sm:p-9"
     >
       <p className="text-sm leading-6 text-[var(--color-muted)]">
         {enquiry.contactHint}
@@ -211,7 +211,7 @@ export function EnquiryForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="min-h-12 rounded-full bg-[var(--studio-champagne-gold)] px-7 text-sm font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)] disabled:cursor-not-allowed disabled:opacity-60"
+        className="min-h-12 rounded-full bg-[var(--color-ink)] px-7 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-clay)] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {submitting ? enquiry.sendingLabel : enquiry.sendButtonLabel}
       </button>
@@ -219,11 +219,12 @@ export function EnquiryForm() {
   );
 }
 
-const inputClass = "premium-input";
+const inputClass =
+  "min-h-12 w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 text-sm text-[var(--color-ink)] outline-none placeholder:text-[var(--color-muted)] focus:border-[var(--color-clay)] focus:ring-2 focus:ring-[var(--color-clay)]/20";
 
 function FieldError({ id, message }: { id: string; message: string }) {
   return (
-    <span id={id} className="field-error mt-2 block text-xs">
+    <span id={id} className="mt-2 block text-xs text-red-700">
       {message}
     </span>
   );

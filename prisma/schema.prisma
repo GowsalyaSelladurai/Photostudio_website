@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+
 model Booking {
   id              String   @id @default(cuid())
   referenceNumber Int      @unique @default(autoincrement())

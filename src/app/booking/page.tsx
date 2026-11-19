@@ -16,7 +16,7 @@ export default function BookingPage() {
       <section className="relative mx-4 h-[210px] overflow-hidden rounded-2xl shadow-[0_15px_45px_rgba(30,25,20,0.12)] sm:mx-8 sm:h-[250px] lg:mx-12 lg:h-[290px]">
 
         <img
-          src="/images/booking-banner.png"
+          src="/images/booking-banner.PNG"
           alt="Photography studio aesthetic"
           fetchPriority="high"
           className="absolute inset-0 h-full w-full object-cover object-center"

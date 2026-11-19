@@ -38,9 +38,8 @@ export function HeroCarousel() {
             }`}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent" />
         <div className="relative flex min-h-[480px] flex-col justify-center px-6 py-16 text-white sm:min-h-[520px] sm:px-10 lg:min-h-[580px] lg:px-14">
-          <div className={`${slide.textAlignment === "right" ? "ml-auto max-w-[16rem] sm:max-w-[25rem]" : "max-w-[25rem]"}`}>
+          <div className={`${slide.textAlignment === "right" ? "ml-auto max-w-[16rem] sm:max-w-[25rem]" : "max-w-[25rem]"} [text-shadow:0_1px_4px_rgba(0,0,0,0.45)]`}>
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80 sm:text-xs">
               {slide.eyebrow}
             </p>

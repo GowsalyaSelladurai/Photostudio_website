@@ -10,6 +10,11 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.error("Page rendering failed", error);
+      return;
+    }
+
     console.error("Page rendering failed", error.digest ?? error.name);
   }, [error]);
 

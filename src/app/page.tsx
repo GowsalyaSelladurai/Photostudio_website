@@ -9,6 +9,7 @@ import { ServiceCard } from "@/components/ui/service-card";
 import { ReviewCard } from "@/components/ui/review-card";
 import { galleryImages, reviews, services, studioConfig } from "@/config/studio.config";
 
+
 export default function Home() {
   const content = studioConfig.home;
 

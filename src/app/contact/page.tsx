@@ -15,12 +15,13 @@ export default function ContactPage() {
   const { contact } = studioConfig;
 
   return (
-    <main className="min-h-screen w-full overflow-x-clip bg-[var(--color-sand)] text-[var(--color-ink)] antialiased lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+    <main className="min-h-screen w-full overflow-x-clip bg-[var(--color-sand)] px-4 pb-8 pt-12 text-[var(--color-ink)] antialiased sm:px-6 lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:gap-8 lg:px-8 lg:pt-16">
 
       {/* Left: Editorial Image */}
-      <aside className="relative isolate h-[60vh] min-h-[420px] w-full overflow-hidden bg-[var(--color-ink)] sm:h-[65vh] lg:sticky lg:top-0 lg:h-screen lg:min-h-0">
+      <aside className="relative isolate h-[55vh] min-h-[380px] w-full overflow-hidden rounded-3xl border border-[var(--color-line)] bg-[var(--color-ink)] shadow-[0_15px_45px_rgba(30,25,20,0.10)] sm:h-[60vh] lg:sticky lg:top-16 lg:h-[calc(100vh-5rem)] lg:min-h-[500px]">
+
         <img
-          src="/images/enquiry-editorial.png"
+          src="/images/enquiry-editorial.jpeg"
           alt="Photography studio camera and creative details"
           className="contact-image-animate absolute inset-0 h-full w-full object-cover object-center"
         />
@@ -28,6 +29,7 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
 
         <div className="contact-text-animate relative z-10 flex h-full flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-14">
+
           <p className="w-fit rounded-full border border-white/20 bg-white/15 px-4 py-2 text-xs tracking-wide text-white backdrop-blur-md">
             {contact.introduction.eyebrow}
           </p>
@@ -41,11 +43,12 @@ export default function ContactPage() {
               {contact.introduction.description}
             </p>
           </div>
+
         </div>
       </aside>
 
       {/* Right: Form and Contact Details */}
-      <div className="min-w-0 w-full px-5 py-12 sm:px-10 sm:py-16 lg:px-10 lg:py-14 xl:px-16">
+      <div className="min-w-0 w-full px-1 py-10 sm:px-4 sm:py-12 lg:px-4 lg:py-2">
         <div className="mx-auto w-full max-w-xl">
 
           {/* Enquiry Form */}

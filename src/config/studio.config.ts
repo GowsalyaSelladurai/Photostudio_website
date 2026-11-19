@@ -394,21 +394,47 @@ export const framePricing = {
   ] satisfies PriceOption[],
 };
 
+
+type AlbumSizePriceOption = PriceOption & {
+  width: number;
+  height: number;
+};
+
 export const albumPricing = {
   sizes: [
-    { id: "classic", label: "Classic · 8 × 8 in", amount: 160 },
-    { id: "wide", label: "Wide · 10 × 10 in", amount: 210 },
-    { id: "grand", label: "Grand · 12 × 12 in", amount: 285 },
-  ] satisfies PriceOption[],
+    {
+      id: "classic",
+      label: "8 × 12 inches",
+      width: 8,
+      height: 12,
+      amount: 300,
+    },
+    {
+      id: "premium",
+      label: "10 × 12 inches",
+      width: 10,
+      height: 12,
+      amount: 400,
+    },
+    {
+      id: "grand",
+      label: "12 × 18 inches",
+      width: 12,
+      height: 18,
+      amount: 500,
+    },
+  ] satisfies AlbumSizePriceOption[],
+
   pages: [
     { id: "20", label: "20 pages", amount: 0 },
-    { id: "30", label: "30 pages", amount: 35 },
-    { id: "40", label: "40 pages", amount: 70 },
+    { id: "30", label: "30 pages", amount: 100 },
+    { id: "40", label: "40 pages", amount: 200 },
   ] satisfies PriceOption[],
+
   finishes: [
-    { id: "linen", label: "Linen", amount: 0 },
-    { id: "leather", label: "Italian leather", amount: 45 },
-    { id: "photo", label: "Photo cover", amount: 25 },
+    { id: "linen", label: "Premium linen", amount: 0 },
+    { id: "leather", label: "Luxury leather", amount: 150 },
+    { id: "photo", label: "Printed photo cover", amount: 100 },
   ] satisfies PriceOption[],
 };
 

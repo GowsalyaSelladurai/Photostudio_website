@@ -4,11 +4,13 @@ import { studioConfig } from "@/config/studio.config";
 const quickLinks = [
   { href: "/", label: "Home" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/film", label: "Film" },
   { href: "/services", label: "Services" },
   { href: "/frames", label: "Frames" },
   { href: "/albums", label: "Albums" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+
 ];
 
 export function SiteFooter() {

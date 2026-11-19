@@ -3,19 +3,22 @@
 import Image from "next/image";
 import { useState } from "react";
 
-const comparisonImage = "/mrge_pic/img5.jpg";
+const beforeImage =
+  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=85";
+const afterImage =
+  "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1400&q=85&sat=-20&exp=8";
 
 export function BeforeAfterSlider() {
   const [position, setPosition] = useState(50);
 
   return (
     <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--studio-champagne-gold)_45%,transparent)] bg-[var(--color-sand)] shadow-xl shadow-black/10">
-      <Image src={comparisonImage} alt="Demo wedding ritual detail before editing" fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" />
+      <Image src={beforeImage} alt="Sample photo before editing" fill sizes="90vw" className="object-cover" />
       <div
         className="absolute inset-0 overflow-hidden"
         style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
       >
-        <Image src={comparisonImage} alt="Demo wedding ritual detail after editing" fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover brightness-105 saturate-90 contrast-105" />
+        <Image src={afterImage} alt="Sample photo after editing" fill sizes="90vw" className="object-cover" />
       </div>
       <span className="absolute left-4 top-4 rounded-full bg-[var(--studio-deep-charcoal)]/90 px-3 py-1 text-xs text-[var(--studio-ivory-white)]">Before · demo</span>
       <span className="absolute right-4 top-4 rounded-full bg-[var(--studio-deep-charcoal)]/90 px-3 py-1 text-xs text-[var(--studio-ivory-white)]">After · demo</span>

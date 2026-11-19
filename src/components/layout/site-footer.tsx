@@ -16,7 +16,7 @@ export function SiteFooter() {
 
   return (
     <footer className="bg-[var(--studio-deep-charcoal)] text-[var(--studio-ivory-white)]">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_1fr_0.8fr] lg:gap-12 lg:py-16">
+      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_1fr_0.8fr] lg:gap-10">
         <div>
           <Link
             href="/"

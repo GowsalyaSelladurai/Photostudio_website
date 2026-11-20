@@ -263,9 +263,9 @@ type DroneShowBannerProps = {
 
 export function DroneShowBanner({
   introOnly = false,
-  showIntro = true,
+  showIntro = false,
 }: DroneShowBannerProps) {
-  const [introVisible, setIntroVisible] = useState(true);
+  const [introVisible, setIntroVisible] = useState(showIntro);
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [showUploadMessage, setShowUploadMessage] = useState(false);
@@ -306,14 +306,7 @@ export function DroneShowBanner({
     };
   }, [introVisible]);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setIntroVisible(false);
-    }, 8300);
-
-    return () => window.clearTimeout(timer);
-  }, []);
-
+  
   useEffect(() => {
     const timer = window.setInterval(() => {
       setCurrentPhoto((previous) => (previous + 1) % photos.length);
@@ -402,7 +395,7 @@ export function DroneShowBanner({
           <button
             type="button"
             className="sf-intro-skip"
-            onClick={() => setIntroVisible(false)}
+            onClick={closeIntro}
           >
             Skip intro <X size={15} />
           </button>

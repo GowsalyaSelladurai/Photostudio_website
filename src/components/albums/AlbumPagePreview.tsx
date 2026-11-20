@@ -10,6 +10,8 @@ import {
 } from "react";
 
 import { getAlbumPhoto } from "@/lib/album-photo-storage";
+import { computePageLayoutSlots } from "@/lib/album-page-canvas";
+import { getAlbumSizeOption } from "@/config/album.config";
 
 import type {
   AlbumProject,
@@ -165,13 +167,9 @@ export function AlbumPagePreview({
     };
   }, [isFullscreen]);
 
-  // Album dimensions.
-  const aspectRatio =
-    project.orientation === "landscape"
-      ? "3 / 2"
-      : project.orientation === "square"
-        ? "1 / 1"
-        : "2 / 3";
+  // True physical album dimensions & aspect ratio
+  const sizeOption = getAlbumSizeOption(project.sizeId);
+  const aspectRatio = `${sizeOption.width} / ${sizeOption.height}`;
 
   const photoCount = placements.length;
   const isFullBleed = layout === "full-bleed";
@@ -187,11 +185,16 @@ export function AlbumPagePreview({
   const photoShadow: AlbumPhotoShadow =
     currentPage?.photoShadow ?? "none";
 
-  const spacingValue = {
-    compact: "4px",
-    balanced: "10px",
-    spacious: "18px",
-  }[photoSpacing];
+  // Calculate layout slots matching the exact canvas renderer dimensions
+  const baseW = 1200;
+  const baseH = Math.round(1200 / (sizeOption.width / sizeOption.height));
+  const layoutSlots = computePageLayoutSlots(
+    layout,
+    photoCount,
+    baseW,
+    baseH,
+    photoSpacing,
+  );
 
   // Photo frame styling.
   function getFrameClass() {
@@ -242,74 +245,6 @@ export function AlbumPagePreview({
       default:
         return "none";
     }
-  }
-
-  // Album page layouts.
-  function getGridClass() {
-    switch (layout) {
-      case "single":
-      case "full-bleed":
-        return "grid-cols-1 grid-rows-1";
-
-      case "two-photo":
-        return "grid-cols-2 grid-rows-1";
-
-      case "three-photo":
-      case "four-grid":
-        return "grid-cols-2 grid-rows-2";
-
-      case "collage":
-        return "grid-cols-4 grid-rows-3";
-    }
-  }
-
-  // Individual photo positions.
-  function getPhotoStyle(index: number): CSSProperties {
-    if (layout === "three-photo") {
-      if (photoCount === 1 && index === 0) {
-        return {
-          gridColumn: "1 / span 2",
-          gridRow: "1 / span 2",
-        };
-      }
-
-      if (index === 0) {
-        return {
-          gridColumn: "1",
-          gridRow: "1 / span 2",
-        };
-      }
-    }
-
-    if (layout === "collage") {
-      if (photoCount === 1 && index === 0) {
-        return {
-          gridColumn: "1 / span 4",
-          gridRow: "1 / span 3",
-        };
-      }
-
-      if (photoCount === 2) {
-        return index === 0
-          ? {
-              gridColumn: "1 / span 2",
-              gridRow: "1 / span 3",
-            }
-          : {
-              gridColumn: "3 / span 2",
-              gridRow: "1 / span 3",
-            };
-      }
-
-      if (index === 0) {
-        return {
-          gridColumn: "1 / span 2",
-          gridRow: "1 / span 2",
-        };
-      }
-    }
-
-    return {};
   }
 
   // Start photo dragging.
@@ -498,19 +433,14 @@ export function AlbumPagePreview({
   // Album page preview.
   const previewPage = (
     <div
-      className={`relative isolate grid w-full max-w-2xl overflow-hidden shadow-xl ${
-        isFullBleed ? "p-0" : "p-3 sm:p-5"
-      } ${getGridClass()}`}
+      className="relative isolate w-full max-w-2xl overflow-hidden shadow-xl"
       style={{
         aspectRatio,
-        background:
-          currentPage?.background ?? "#F5F0E8",
-        gap: isFullBleed ? "0px" : spacingValue,
-        gridAutoRows: "minmax(0, 1fr)",
+        background: currentPage?.background ?? "#F5F0E8",
       }}
     >
       {photoCount === 0 ? (
-        <div className="col-span-full row-span-full flex flex-col items-center justify-center px-5 text-center">
+        <div className="flex h-full w-full flex-col items-center justify-center px-5 text-center">
           <span className="text-4xl text-[#B99B70]">
             ＋
           </span>
@@ -530,11 +460,24 @@ export function AlbumPagePreview({
             selectedPhotoPlacementId === placement.id;
 
           const transform = placement.transform;
+          const isContain = transform?.fitMode === "contain";
+          const slot = layoutSlots[index] ?? {
+            index,
+            x: 0,
+            y: 0,
+            width: baseW,
+            height: baseH,
+          };
+
+          const slotLeftPercent = (slot.x / baseW) * 100;
+          const slotTopPercent = (slot.y / baseH) * 100;
+          const slotWidthPercent = (slot.width / baseW) * 100;
+          const slotHeightPercent = (slot.height / baseH) * 100;
 
           return (
             <div
               key={placement.id}
-              className={`relative z-10 min-h-0 min-w-0 touch-none select-none overflow-hidden ${
+              className={`absolute z-10 min-h-0 min-w-0 touch-none select-none overflow-hidden ${
                 getFrameClass()
               } ${
                 isSelected
@@ -542,9 +485,13 @@ export function AlbumPagePreview({
                   : "ring-1 ring-inset ring-black/5"
               }`}
               style={{
-                ...getPhotoStyle(index),
+                left: `${slotLeftPercent}%`,
+                top: `${slotTopPercent}%`,
+                width: `${slotWidthPercent}%`,
+                height: `${slotHeightPercent}%`,
                 borderRadius: getCornerRadius(),
                 boxShadow: getPhotoShadow(),
+                backgroundColor: isContain ? "#F5F0E8" : undefined,
               }}
               onPointerDown={(event) =>
                 handlePointerDown(event, placement)
@@ -565,7 +512,9 @@ export function AlbumPagePreview({
                   src={imageUrls[placement.photoId]}
                   alt="Album photograph"
                   draggable={false}
-                  className="pointer-events-none h-full w-full object-cover"
+                  className={`pointer-events-none h-full w-full ${
+                    isContain ? "object-contain" : "object-cover"
+                  }`}
                   style={{
                     transform: `translate(${transform.x}%, ${transform.y}%) scale(${transform.scale}) rotate(${transform.rotation}deg)`,
                     objectPosition: `${50 + transform.cropX}% ${50 + transform.cropY}%`,

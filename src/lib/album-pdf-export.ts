@@ -21,6 +21,7 @@ import type {
   AlbumCoverFinish,
 } from "@/types/album";
 import { albumPricing } from "@/config/studio.config";
+import { getAlbumSizeOption } from "@/config/album.config";
 import { getAlbumPhoto } from "@/lib/album-photo-storage";
 import {
   renderAlbumPageToCanvas,
@@ -114,42 +115,22 @@ export function resolveAlbumPhysicalDimensions(
   sizeId: string,
   orientation: AlbumOrientation = "portrait",
 ): AlbumPhysicalSize {
-  const sizeConfig = albumPricing.sizes.find((s) => s.id === sizeId) ?? {
-    id: sizeId || "classic",
-    width: 8,
-    height: 12,
-  };
+  const sizeOption = getAlbumSizeOption(sizeId);
 
-  const rawW = sizeConfig.width;
-  const rawH = sizeConfig.height;
-
-  let widthInches: number;
-  let heightInches: number;
-
-  if (orientation === "landscape") {
-    widthInches = Math.max(rawW, rawH);
-    heightInches = Math.min(rawW, rawH);
-  } else if (orientation === "square") {
-    const side = Math.min(rawW, rawH);
-    widthInches = side;
-    heightInches = side;
-  } else {
-    // Default portrait
-    widthInches = Math.min(rawW, rawH);
-    heightInches = Math.max(rawW, rawH);
-  }
+  const widthInches = sizeOption.width;
+  const heightInches = sizeOption.height;
 
   // 72 PDF points per inch
   const widthPt = Number((widthInches * 72).toFixed(2));
   const heightPt = Number((heightInches * 72).toFixed(2));
 
   return {
-    sizeId: sizeConfig.id,
+    sizeId: sizeOption.id,
     widthInches,
     heightInches,
     widthPt,
     heightPt,
-    orientation,
+    orientation: sizeOption.orientation || orientation,
   };
 }
 

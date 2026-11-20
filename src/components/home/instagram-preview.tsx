@@ -2,6 +2,13 @@ import Image from "next/image";
 import { studioConfig, galleryImages } from "@/config/studio.config";
 import { SectionHeading } from "@/components/ui/section-heading";
 
+const previewImages = [
+  { image: galleryImages[1], src: "/mrge_pic/img1.jpg" },
+  { image: galleryImages[3], src: "/mrge_pic/img3.jpg" },
+  { image: galleryImages[5], src: "/mrge_pic/img5.jpg" },
+  { image: galleryImages[4], src: "/mrge_pic/img6.jpg" },
+];
+
 export function InstagramPreview() {
   const content = studioConfig.home.instagram;
 
@@ -23,18 +30,18 @@ export function InstagramPreview() {
             {content.linkLabel} ↗
           </a>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {galleryImages.slice(3, 6).map((image) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {previewImages.map(({ image, src }) => (
             <a
               key={image.id}
               href={studioConfig.contact.instagramUrl}
               target="_blank"
               rel="noreferrer"
               aria-label={`${image.title}, sample Instagram preview`}
-              className="relative aspect-square overflow-hidden rounded-xl bg-[var(--color-paper-deep)]"
+              className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[var(--color-paper-deep)]"
             >
               <Image
-                src={image.image}
+                src={src}
                 alt={image.alt}
                 fill
                 sizes="(max-width: 640px) 45vw, 30vw"

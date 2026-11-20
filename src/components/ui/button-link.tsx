@@ -14,7 +14,7 @@ const variants = {
   dark:
     "bg-[var(--studio-champagne-gold)] text-[var(--studio-midnight-black)] hover:bg-[var(--studio-warm-beige)]",
   outline:
-    "border border-[var(--studio-champagne-gold)] bg-transparent text-[var(--studio-midnight-black)] hover:bg-[var(--studio-champagne-gold)]",
+    "    border border-[var(--studio-champagne-gold)] bg-transparent text-[var(--studio-midnight-black)] hover:bg-[var(--studio-champagne-gold)]",
 };
 
 export function ButtonLink({

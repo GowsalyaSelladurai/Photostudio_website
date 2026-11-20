@@ -8,7 +8,7 @@ import {
   OrbitControls,
   useTexture,
 } from "@react-three/drei";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, Suspense } from "react";
 import {
   BufferAttribute,
   BufferGeometry,
@@ -122,6 +122,12 @@ export interface Frame3DPreviewProps {
 const INCH_TO_SCENE = 0.12;
 const FRAME_BORDER = 0.22;
 const CAMERA_FOV = 38;
+
+// Preload standard frame sample photographs for zero-delay instant orientation switching
+if (typeof window !== "undefined") {
+  useTexture.preload("/images/default-frame-photo.jpeg");
+  useTexture.preload("/images/booking-editorial.png");
+}
 
 /**
  * Global texture cache to prevent regenerating procedural textures on every render.
@@ -1240,15 +1246,17 @@ function FrameModel({
     <group name="frame-product-group">
       {/* Artwork mounted cleanly directly into the frame rebate — zero white mat border */}
       {artworkUrl ? (
-        <Artwork
-          url={artworkUrl}
-          width={sightOpeningWidth}
-          height={sightOpeningHeight}
-          photoZoom={photoZoom}
-          photoPosition={photoPosition}
-          onPhotoPositionChange={onPhotoPositionChange}
-          positionZ={artZ}
-        />
+        <Suspense fallback={null}>
+          <Artwork
+            url={artworkUrl}
+            width={sightOpeningWidth}
+            height={sightOpeningHeight}
+            photoZoom={photoZoom}
+            photoPosition={photoPosition}
+            onPhotoPositionChange={onPhotoPositionChange}
+            positionZ={artZ}
+          />
+        </Suspense>
       ) : (
         <mesh position={[0, 0, artZ]}>
           <planeGeometry args={[sightOpeningWidth, sightOpeningHeight]} />
@@ -1356,9 +1364,11 @@ function StudioLightingEnvironment() {
 function CameraFit({
   frameWidth,
   frameHeight,
+  controlsRef,
 }: {
   frameWidth: number;
   frameHeight: number;
+  controlsRef?: React.RefObject<any>;
 }) {
   const { camera, size } = useThree();
 
@@ -1373,8 +1383,20 @@ function CameraFit({
     const horizontalDistance =
       frameWidth / (2 * Math.tan(verticalFov / 2) * aspect);
 
+    const fitDistance = Math.max(verticalDistance, horizontalDistance);
+
+    // Calibrated reference distance based on Large (16x20) frame
+    // Enables Small (8x10) to visibly appear smaller (~34% screen height),
+    // Medium (12x16) to visibly appear larger than Small (~46% screen height),
+    // and Large (16x20) to visibly appear larger than Medium (~58% screen height),
+    // while ensuring extreme custom sizes (up to 40") fit safely without clipping.
+    const refDistance = (2.84 / (2 * Math.tan(verticalFov / 2))) * 1.35 + 0.35;
+    const ratio = fitDistance / refDistance;
+
     const distance =
-      Math.max(verticalDistance, horizontalDistance) * 1.45 + 0.35;
+      ratio <= 1.0
+        ? refDistance * (0.68 + 0.32 * ratio)
+        : Math.max(refDistance, fitDistance * 1.35 + 0.35);
 
     perspectiveCamera.position.set(0, 0, distance);
     perspectiveCamera.lookAt(0, 0, 0);
@@ -1382,7 +1404,13 @@ function CameraFit({
     perspectiveCamera.near = 0.01;
     perspectiveCamera.far = distance * 10;
     perspectiveCamera.updateProjectionMatrix();
-  }, [camera, size.width, size.height, frameWidth, frameHeight]);
+
+    if (controlsRef?.current) {
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
+      controlsRef.current.saveState();
+    }
+  }, [camera, size.width, size.height, frameWidth, frameHeight, controlsRef]);
 
   return null;
 }
@@ -1568,6 +1596,7 @@ function ProductExportBridge({
 }
 
 export default function Frame3DPreview(props: Frame3DPreviewProps) {
+  const controlsRef = useRef<any>(null);
   const lighting = STUDIO_LIGHTING;
 
   const frameWidth = props.widthIn * INCH_TO_SCENE;
@@ -1611,6 +1640,7 @@ export default function Frame3DPreview(props: Frame3DPreviewProps) {
           <CameraFit
             frameWidth={outerWidth + 0.12}
             frameHeight={outerHeight + 0.12}
+            controlsRef={controlsRef}
           />
 
           <ContactShadows
@@ -1624,6 +1654,7 @@ export default function Frame3DPreview(props: Frame3DPreviewProps) {
           />
 
           <OrbitControls
+            ref={controlsRef}
             enablePan={false}
             enableZoom
             enableRotate
@@ -1659,33 +1690,72 @@ export default function Frame3DPreview(props: Frame3DPreviewProps) {
           <span>3D Interactive Studio</span>
         </div>
 
-        <div className="fs-stage-controls" aria-hidden="true">
-          <span className="fs-stage-controls__item">
+        <div className="fs-stage-controls">
+          <span
+            className="fs-stage-controls__item"
+            title="Drag with mouse or finger to inspect 3D frame angles"
+          >
             <svg
               viewBox="0 0 24 24"
-              width="12"
-              height="12"
+              width="13"
+              height="13"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
             </svg>
-            Rotate frame
+            <span>Rotate</span>
           </span>
-          <span className="fs-stage-controls__divider">•</span>
-          <span className="fs-stage-controls__item">
+
+          <span className="fs-stage-controls__divider" aria-hidden="true">
+            •
+          </span>
+
+          <span
+            className="fs-stage-controls__item"
+            title="Scroll to zoom in and examine moulding details"
+          >
             <svg
               viewBox="0 0 24 24"
-              width="12"
-              height="12"
+              width="13"
+              height="13"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <line x1="11" y1="8" x2="11" y2="14" />
+              <line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+            <span>Zoom</span>
+          </span>
+
+          <span className="fs-stage-controls__divider" aria-hidden="true">
+            •
+          </span>
+
+          <span
+            className="fs-stage-controls__item"
+            title="Adjust photograph placement inside aperture"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
               <polyline points="5 9 2 12 5 15" />
               <polyline points="9 5 12 2 15 5" />
@@ -1694,27 +1764,39 @@ export default function Frame3DPreview(props: Frame3DPreviewProps) {
               <line x1="2" y1="12" x2="22" y2="12" />
               <line x1="12" y1="2" x2="12" y2="22" />
             </svg>
-            Reposition photo
+            <span>Reposition</span>
           </span>
-          <span className="fs-stage-controls__divider">•</span>
-          <span className="fs-stage-controls__item">
+
+          <span className="fs-stage-controls__divider" aria-hidden="true">
+            •
+          </span>
+
+          <button
+            type="button"
+            className="fs-stage-controls__reset"
+            onClick={() => {
+              if (controlsRef.current) {
+                controlsRef.current.reset();
+              }
+            }}
+            title="Reset 3D camera to default front view"
+          >
             <svg
               viewBox="0 0 24 24"
-              width="12"
-              height="12"
+              width="13"
+              height="13"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              <line x1="11" y1="8" x2="11" y2="14" />
-              <line x1="8" y1="11" x2="14" y2="11" />
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
-            Zoom
-          </span>
+            <span>Reset View</span>
+          </button>
         </div>
       </div>
     </div>

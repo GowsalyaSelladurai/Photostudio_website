@@ -117,7 +117,7 @@ export function AlbumHeroVideoSlideshow({
         autoPlay
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         onEnded={() => handleVideoEnded(0)}
         onError={() => handleVideoError(0)}
         className={`absolute inset-0 h-full w-full rounded-xl object-cover transition-opacity duration-700 ease-in-out ${
@@ -133,7 +133,7 @@ export function AlbumHeroVideoSlideshow({
         src={ALBUM_VIDEOS[1].src}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         onEnded={() => handleVideoEnded(1)}
         onError={() => handleVideoError(1)}
         className={`absolute inset-0 h-full w-full rounded-xl object-cover transition-opacity duration-700 ease-in-out ${
@@ -149,6 +149,8 @@ export function AlbumHeroVideoSlideshow({
           <img
             src={fallbackImageSrc}
             alt="Premium hardcover photo album showcase"
+            loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover rounded-xl"
           />
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-lg bg-[#292522]/80 px-4 py-2 backdrop-blur-md">

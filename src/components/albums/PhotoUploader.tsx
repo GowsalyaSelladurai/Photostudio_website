@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { albumConfig } from "@/config/album.config";
+import { analyzePhotoBlob } from "@/lib/ai/smart-fit-client";
 import {
   deleteAlbumPhoto,
   getAlbumPhoto,
@@ -189,6 +190,32 @@ export function PhotoUploader({
       }));
 
       onProjectChange(updatedProject);
+
+      // Asynchronously trigger AI Smart Fit analysis in the background
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        const photoId = addedIds[i];
+        void analyzePhotoBlob(file, photoId)
+          .then((smartFit) => {
+            const latestPhotos = updatedProject.photos.map((p) =>
+              p.id === photoId ? { ...p, smartFit } : p,
+            );
+            const enrichedProject: AlbumProject = {
+              ...updatedProject,
+              photos: latestPhotos,
+              updatedAt: Date.now(),
+            };
+            try {
+              saveAlbumProject(enrichedProject);
+            } catch (err) {
+              console.warn("Could not save enriched project:", err);
+            }
+            onProjectChange(enrichedProject);
+          })
+          .catch((err) => {
+            console.warn("SmartFit: Photo analysis warning:", err);
+          });
+      }
     } catch (uploadError) {
       Object.values(newPreviewUrls).forEach(URL.revokeObjectURL);
 
@@ -349,7 +376,12 @@ export function PhotoUploader({
                   key={photo.id}
                   className="group relative overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--studio-warm-beige)]"
                 >
-                  <div className="aspect-square">
+                  <div className="aspect-square relative">
+                    {photo.smartFit && (
+                      <span className="absolute top-1.5 left-1.5 z-10 rounded-full bg-emerald-950/80 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-200 backdrop-blur-sm shadow">
+                        ✨ AI Fit
+                      </span>
+                    )}
                     {previewUrls[photo.id] ? (
                       <img
                         src={previewUrls[photo.id]}
@@ -445,6 +477,11 @@ export function PhotoUploader({
                     className="group overflow-hidden rounded-xl border border-[var(--color-line)] bg-white"
                   >
                     <div className="relative aspect-square bg-[var(--studio-warm-beige)]">
+                      {photo.smartFit && (
+                        <span className="absolute top-2 left-2 z-10 rounded-full bg-emerald-950/85 px-2 py-0.5 text-[10px] font-semibold text-emerald-200 backdrop-blur-sm shadow">
+                          ✨ AI Smart Fit
+                        </span>
+                      )}
                       {previewUrls[photo.id] ? (
                         <img
                           src={previewUrls[photo.id]}

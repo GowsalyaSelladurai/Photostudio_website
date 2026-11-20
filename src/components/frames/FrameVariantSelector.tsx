@@ -62,25 +62,13 @@ function VariantThumbnailImage({
     probe.src = src;
 
     return () => {
-      // Keep every frame inside the same preview area
-      const stageWidth = 120;
-      const stageHeight = 145;
-
-      const [ratioWidth, ratioHeight] = aspectRatio
-        .split("/")
-        .map((value) => Number(value.trim()));
-
-      const ratio =
-        ratioWidth > 0 && ratioHeight > 0 ? ratioWidth / ratioHeight : 1;
-
-      const frameWidth = Math.min(stageWidth, stageHeight * ratio);
-      const frameHeight = frameWidth / ratio;
       active = false;
     };
   }, [src]);
-  // Calculate frame dimensions within a common preview area
-  const stageWidth = 120;
-  const stageHeight = 145;
+
+  // Calculate compact frame dimensions within a 84x68 preview area
+  const stageWidth = 84;
+  const stageHeight = 68;
 
   const [ratioWidth, ratioHeight] = aspectRatio
     .split("/")
@@ -96,8 +84,8 @@ function VariantThumbnailImage({
       <div
         className="fs-variant-thumb__moulding"
         style={{
-          width: `${frameWidth}px`,
-          height: `${frameHeight}px`,
+          width: `${Math.round(frameWidth)}px`,
+          height: `${Math.round(frameHeight)}px`,
         }}
       >
         <div className="fs-variant-thumb__mat">
@@ -169,20 +157,6 @@ export default function FrameVariantSelector({
       className="fs-variant-selector"
       aria-label="Frame size and aspect ratio variants"
     >
-      <div className="fs-variant-selector__header">
-        <div className="fs-variant-selector__title-row">
-          <span className="fs-variant-selector__eyebrow">
-            Frame Variants & Options
-          </span>
-          <span className="fs-variant-selector__active-tag">
-            Option {selectedId} Active
-          </span>
-        </div>
-        <p className="fs-variant-selector__hint">
-          Select a frame option to preview dimensions and photograph in 3D:
-        </p>
-      </div>
-
       <div
         className="fs-variant-grid"
         role="radiogroup"
@@ -205,26 +179,23 @@ export default function FrameVariantSelector({
               }`}
               title={`Select ${v.title} (${v.dimensionLabel} ${v.orientationLabel})`}
             >
-              {/* Option Badge & Active Checkmark */}
-              <div className="fs-variant-card__top">
-                <span className="fs-variant-card__badge">{v.badge}</span>
-                {isSelected && (
-                  <span className="fs-variant-card__check" aria-hidden="true">
-                    <svg
-                      viewBox="0 0 24 24"
-                      width="12"
-                      height="12"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                )}
-              </div>
+              {/* Active Checkmark Pill - Absolutely positioned so card layout never shifts */}
+              {isSelected && (
+                <span className="fs-variant-card__check" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="10"
+                    height="10"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              )}
 
               {/* Miniature Physical Frame Thumbnail */}
               <VariantThumbnailImage

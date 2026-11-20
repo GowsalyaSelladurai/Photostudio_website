@@ -18,6 +18,8 @@ import {
 import { resolveFrameDimensions } from "../../lib/frameStudio";
 import { calculateFramePrice } from "../../config/framePricing";
 
+import dynamic from "next/dynamic";
+
 import type {
   CustomDimensionsInput,
   FrameColorId,
@@ -29,7 +31,19 @@ import type {
   GlazingTypeId,
 } from "../../types/frame";
 
-import Frame3DPreview from "./Frame3DPreview";
+const Frame3DPreview = dynamic(() => import("./Frame3DPreview"), {
+  ssr: false,
+  loading: () => (
+    <div className="fs-stage-outer">
+      <div className="fs-stage-inner flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#B99B70] border-t-transparent" />
+          <span className="font-serif text-sm text-[#292522]/80">Loading 3D Studio Preview...</span>
+        </div>
+      </div>
+    </div>
+  ),
+});
 import FrameVariantSelector, { type FrameVariant } from "./FrameVariantSelector";
 import FrameSizeSelector from "./FrameSizeSelector";
 import OrientationSelector from "./OrientationSelector";
@@ -57,15 +71,18 @@ const STEPS = [
 
 const TRUST_POINTS = [
   {
-    label: "Premium quality frames",
+    title: "Premium quality frames",
+    subtitle: "Archival museum-grade mats",
     icon: <path d="M6 4h12l4 6-10 11L2 10l4-6Zm-4 6h20M9 4l3 6 3-6m-3 6v11" />,
   },
   {
-    label: "Customizable options",
+    title: "Customizable options",
+    subtitle: "Tailored to your exact size",
     icon: <path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19c2-4 5-7 9-9" />,
   },
   {
-    label: "Reliable delivery",
+    title: "Reliable delivery",
+    subtitle: "Protective crating & direct courier",
     icon: (
       <path d="M12 3 4.5 6v5.5c0 4.4 3 7.6 7.5 9.5 4.5-1.9 7.5-5.1 7.5-9.5V6L12 3Zm-3 9 2.2 2.2L15.5 10" />
     ),
@@ -396,7 +413,6 @@ export default function FrameStudio({ onContinue }: FrameStudioProps) {
             </div>
 
             <Frame3DPreview
-              key={`preview-variant-${selectedVariantId}-${activeVariant.widthIn}-${activeVariant.heightIn}`}
               widthIn={activeVariant.widthIn}
               heightIn={activeVariant.heightIn}
               frameMaterial={frameMaterial}
@@ -650,22 +666,25 @@ export default function FrameStudio({ onContinue }: FrameStudioProps) {
 
         <ul className="fs-trust">
           {TRUST_POINTS.map((point) => (
-            <li key={point.label} className="fs-trust__item">
-              <svg
-                viewBox="0 0 24 24"
-                width="28"
-                height="28"
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                {point.icon}
-              </svg>
-
-              <span>{point.label}</span>
+            <li key={point.title} className="fs-trust__item">
+              <span className="fs-trust__icon-box" aria-hidden="true">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {point.icon}
+                </svg>
+              </span>
+              <div className="fs-trust__text">
+                <span className="fs-trust__title">{point.title}</span>
+                <span className="fs-trust__sub">{point.subtitle}</span>
+              </div>
             </li>
           ))}
         </ul>
@@ -677,7 +696,10 @@ export default function FrameStudio({ onContinue }: FrameStudioProps) {
               className="fs-button fs-button--secondary"
               onClick={() => setActiveStep((current) => current - 1)}
             >
-              Back
+              <span className="fs-button__icon-left" aria-hidden="true">
+                ←
+              </span>
+              <span>Back</span>
             </button>
           )}
 
@@ -688,7 +710,10 @@ export default function FrameStudio({ onContinue }: FrameStudioProps) {
               disabled={activeStep === 0 && customInvalid}
               onClick={handleContinue}
             >
-              Continue
+              <span>Continue</span>
+              <span className="fs-button__icon-right" aria-hidden="true">
+                →
+              </span>
             </button>
           ) : (
             <div

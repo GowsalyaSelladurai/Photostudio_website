@@ -104,4 +104,3 @@ export interface GlazingProperties {
   thickness: number;
   uvProtection: string;
 }
-

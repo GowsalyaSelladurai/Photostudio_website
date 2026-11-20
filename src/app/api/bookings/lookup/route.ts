@@ -65,6 +65,7 @@ export async function POST(request: Request) {
         referenceNumber: true,
         shootType: true,
         startsAt: true,
+        status: true,
       },
     });
 
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
         reference: `SF-${String(booking.referenceNumber).padStart(6, "0")}`,
         shootType: booking.shootType,
         startsAt: booking.startsAt.toISOString(),
-        status: "PENDING" as const,
+        status: booking.status,
       },
     });
   } catch (error) {

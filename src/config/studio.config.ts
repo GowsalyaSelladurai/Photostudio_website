@@ -14,8 +14,8 @@ export const studioConfig = {
   tagline: "Photographs that feel like home.",
   description:
     "A demo photography studio celebrating people, places, and the moments in between.",
-  currency: "USD",
-  locale: "en-US",
+  currency: "INR",
+locale: "en-IN",
   about: {
     introduction: {
       eyebrow: "The studio · demo",
@@ -23,16 +23,19 @@ export const studioConfig = {
       description:
         "StudioFrame is a demonstration photography studio built around thoughtful portraits, honest connection, and the moments people want to remember.",
     },
-    story: {
-      eyebrow: "Our story · demo",
-      title: "A little more presence. A little less posing.",
-      paragraphs: [
-        "This sample studio story shows how an approved biography might appear. StudioFrame is a temporary demo brand, and no client history or personal details are implied.",
-        "We believe photographs become keepsakes when people feel seen. Our sessions make room for the small gestures, familiar faces, and unexpected moments that make a story personal.",
-      ],
-      image: demoImage("photo-1452587925148-ce544e77e70d", 1400),
-      imageAlt: "A camera prepared for a photography session",
-    },
+    
+story: {
+  eyebrow: "Our Story · Rooted in Tradition",
+  title: "Every frame carries a feeling. Every story deserves to be remembered.",
+  paragraphs: [
+    "Inspired by the colours, traditions, and beautiful celebrations of Tamil Nadu and Kerala, StudioFrame brings meaningful moments to life through photography.",
+    "From traditional weddings and intimate celebrations to everyday portraits, we believe the most beautiful photographs are the ones that feel real, natural, and timeless."
+  ],
+  image:
+    "https://itsmy.wedding/images/blog/trivandrum/wedding-photographer-trivandrum-action.webp",
+  imageAlt: "A photographer capturing a traditional South Indian wedding"
+},
+
     approach: {
       eyebrow: "How we work · demo",
       title: "A thoughtful approach, from hello to the final frame.",
@@ -57,37 +60,37 @@ export const studioConfig = {
       ],
     },
     team: {
-      eyebrow: "The people behind the camera · sample team",
-      title: "A small demo team, here to make you feel at home.",
+  eyebrow: "Meet the creative minds",
+  title: "The people behind every beautiful frame.",
+  description:
+    "A passionate creative team bringing stories to life through photography, imagination, and attention to detail.",
+  members: [
+    {
+      name: "Arjun Mehta",
+      role: "Creative Director",
       description:
-        "These role-based profiles are placeholders, not real team members.",
-      members: [
-        {
-          name: "Studio Lead · demo",
-          role: "Session planning",
-          description:
-            "Helps shape the session around the people, place, and feeling you want to remember.",
-          image: demoImage("photo-1534528741775-53994a69daeb", 700),
-          imageAlt: "Sample portrait representing the demo studio lead",
-        },
-        {
-          name: "Portrait Photographer · demo",
-          role: "Photography",
-          description:
-            "Offers gentle guidance while keeping the experience relaxed and personal.",
-          image: demoImage("photo-1500648767791-00dcc994a43e", 700),
-          imageAlt: "Sample portrait representing a demo photographer",
-        },
-        {
-          name: "Image Finisher · demo",
-          role: "Editing and keepsakes",
-          description:
-            "Prepares each selected photograph with a consistent, thoughtful finish.",
-          image: demoImage("photo-1531123897727-8f129e1688ce", 700),
-          imageAlt: "Sample portrait representing a demo image finisher",
-        },
-      ],
+        "Develops creative concepts and brings a unique vision to every photography experience.",
+      image: demoImage("photo-1506794778202-cad84cf45f1d", 700),
+      imageAlt: "Portrait of a creative director",
     },
+    {
+      name: "Maya Sharma",
+      role: "Lead Photographer",
+      description:
+        "Captures genuine expressions, beautiful details, and meaningful moments through her lens.",
+      image: demoImage("photo-1524504388940-b1c1722653e1", 700),
+      imageAlt: "Portrait of a female photographer",
+    },
+    {
+      name: "Daniel Thomas",
+      role: "Visual Storyteller",
+      description:
+        "Transforms photographs into timeless visual stories through thoughtful editing and design.",
+      image: demoImage("photo-1507003211169-0a1dd7228f2d", 700),
+      imageAlt: "Portrait of a visual storyteller",
+    },
+  ],
+},
     visit: {
       eyebrow: "Find the studio · demo details",
       title: "A place for your next story.",
@@ -196,24 +199,47 @@ export const studioConfig = {
       { name: "Facebook · demo link", href: "https://www.facebook.com/" },
     ],
   },
-  hero: {
-    slides: [
-      {
-        eyebrow: "The art of remembering",
-        title: "Honest moments.\nBeautifully held.",
-        image: demoImage("photo-1519741497674-611481863552", 2000),
-        imageAlt: "A couple sharing a quiet moment outdoors",
-      },
-      {
-        eyebrow: "Made for the ordinary magic",
-        title: "Keep close\nto what matters.",
-        image: demoImage("photo-1511895426328-dc8714191300", 2000),
-        imageAlt: "A family enjoying a quiet moment together",
-      },
-    ],
-    bookingLinkLabel: "Begin with a conversation",
-    galleryLinkLabel: "Explore the gallery",
-  },
+  
+
+hero: {
+  slides: [
+    {
+      eyebrow: "The beauty of Tamil traditions",
+      title: "Honest moments.\nBeautifully held.",
+      image: "/mrge_pic/img1.jpg",
+      imageAlt: "Traditional wedding celebration",
+      objectPosition: "center 24%",
+      textAlignment: "right",
+    },
+    {
+      eyebrow: "A celebration of togetherness",
+      title: "Keep close\nto what matters.",
+      image: "/mrge_pic/img2.jpg",
+      imageAlt: "Wedding couple celebrating together",
+      objectPosition: "center 30%",
+      textAlignment: "left",
+    },
+    {
+      eyebrow: "Stories made to last",
+      title: "Warm light.\nReal feeling.",
+      image: "/mrge_pic/img3.jpg",
+      imageAlt: "Wedding couple photographed in warm light",
+      objectPosition: "center 32%",
+      textAlignment: "left",
+    },
+    {
+      eyebrow: "Every detail belongs",
+      title: "The moments\nbetween moments.",
+      image: "/mrge_pic/img4.jpg",
+      imageAlt: "Candid wedding photography",
+      objectPosition: "center 28%",
+      textAlignment: "left",
+    },
+  ],
+  bookingLinkLabel: "Begin with a conversation",
+  galleryLinkLabel: "Explore the gallery",
+},
+
   offer: {
     label: "A little something extra",
     message: "Complimentary keepsake print with every demo portrait session.",
@@ -325,6 +351,7 @@ export const galleryImages: GalleryImage[] = [
   },
 ];
 
+// Fictional placeholder reviews for the demo studio.
 export const reviews: Review[] = [
   {
     id: "review-one",
@@ -376,6 +403,20 @@ type AlbumSizePriceOption = PriceOption & {
 export const albumPricing = {
   sizes: [
     {
+      id: "4x4",
+      label: "4 × 4 inches",
+      width: 4,
+      height: 4,
+      amount: 250,
+    },
+    {
+      id: "10x4",
+      label: "10 × 4 inches",
+      width: 10,
+      height: 4,
+      amount: 350,
+    },
+    {
       id: "classic",
       label: "8 × 12 inches",
       width: 8,
@@ -388,6 +429,13 @@ export const albumPricing = {
       width: 10,
       height: 12,
       amount: 400,
+    },
+    {
+      id: "12x8",
+      label: "12 × 8 inches",
+      width: 12,
+      height: 8,
+      amount: 420,
     },
     {
       id: "grand",
@@ -410,7 +458,6 @@ export const albumPricing = {
     { id: "photo", label: "Printed photo cover", amount: 100 },
   ] satisfies PriceOption[],
 };
-
 
 export const galleryCategories = [
   "All",

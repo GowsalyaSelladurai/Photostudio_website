@@ -13,19 +13,20 @@ enum BookingStatus {
   CANCELLED
 }
 
-
 model Booking {
-  id              String   @id @default(cuid())
-  referenceNumber Int      @unique @default(autoincrement())
-  name            String   @db.VarChar(120)
-  mobile          String   @db.VarChar(32)
-  shootType       String   @db.VarChar(80)
-  startsAt        DateTime @unique @db.Timestamptz(3)
-  location        String   @db.VarChar(300)
-  requirements    String?  @db.Text
-  createdAt       DateTime @default(now())
+  id              String        @id @default(cuid())
+  referenceNumber Int           @unique @default(autoincrement())
+  name            String        @db.VarChar(120)
+  mobile          String        @db.VarChar(32)
+  shootType       String        @db.VarChar(80)
+  startsAt        DateTime      @unique @db.Timestamptz(3)
+  location        String        @db.VarChar(300)
+  requirements    String?       @db.Text
+  status          BookingStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
 
   @@index([createdAt], map: "booking_created_at_idx")
+  @@index([status], map: "booking_status_idx")
   @@map("booking")
 }
 

@@ -19,8 +19,14 @@ interface FrameSizeSelectorProps {
 function CheckMark() {
   return (
     <span className="fs-choice__tick" aria-hidden="true">
-      <svg viewBox="0 0 16 16" width="12" height="12">
-        <path d="m3.5 8.5 3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <svg viewBox="0 0 16 16" width="10" height="10" fill="none">
+        <path
+          d="m3.5 8.5 3 3 6-7"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
       </svg>
     </span>
   );
@@ -68,6 +74,8 @@ export default function FrameSizeSelector({
               } as CSSProperties)
             : undefined;
 
+          const isSelected = value === size.id;
+
           return (
             <label key={size.id} className="fs-choice">
               <input
@@ -75,15 +83,15 @@ export default function FrameSizeSelector({
                 type="radio"
                 name="frame-size"
                 value={size.id}
-                checked={value === size.id}
+                checked={isSelected}
                 onChange={() => onChange(size.id)}
               />
-              <span className="fs-choice__card fs-size">
+              <span className={`fs-choice__card fs-size ${isSelected ? "fs-size--selected" : ""}`}>
                 <span className="fs-size__visual" aria-hidden="true">
                   {isCustom ? (
                     <span className="fs-size__custom">
-                      <svg viewBox="0 0 24 24" width="22" height="22">
-                        <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor">
+                        <path d="M12 5v14M5 12h14" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                   ) : (
@@ -116,6 +124,7 @@ export default function FrameSizeSelector({
                 min={CUSTOM_SIZE_LIMITS.minIn}
                 max={CUSTOM_SIZE_LIMITS.maxIn}
                 step="0.25"
+                placeholder="e.g. 14"
                 value={custom.width}
                 onChange={(event) =>
                   onCustomChange({ ...custom, width: event.target.value })
@@ -131,6 +140,7 @@ export default function FrameSizeSelector({
                 min={CUSTOM_SIZE_LIMITS.minIn}
                 max={CUSTOM_SIZE_LIMITS.maxIn}
                 step="0.25"
+                placeholder="e.g. 20"
                 value={custom.height}
                 onChange={(event) =>
                   onCustomChange({ ...custom, height: event.target.value })

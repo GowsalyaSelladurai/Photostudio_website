@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { studioConfig } from "@/config/studio.config";
 
 export function HeroCarousel() {
@@ -10,46 +10,56 @@ export function HeroCarousel() {
   const [activeIndex, setActiveIndex] = useState(0);
   const slide = slides[activeIndex];
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveIndex((index) => (index + 1) % slides.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
+
   function showSlide(direction: -1 | 1) {
     setActiveIndex((index) => (index + direction + slides.length) % slides.length);
   }
 
   return (
-    <section
-      aria-label="Featured photography"
-      aria-roledescription="carousel"
-      className="relative isolate min-h-[620px] overflow-hidden bg-[var(--color-ink)] sm:min-h-[690px]"
-    >
-      <Image
-        src={slide.image}
-        alt={slide.imageAlt}
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-black/5" />
-      <div className="relative mx-auto flex min-h-[620px] max-w-7xl flex-col justify-center px-5 py-20 text-white sm:min-h-[690px] sm:px-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/75">
-            {slide.eyebrow}
-          </p>
-          <h1 aria-live="polite" className="mt-6 whitespace-pre-line font-serif text-6xl leading-[0.98] tracking-tight sm:text-7xl lg:text-8xl">
-            {slide.title}
-          </h1>
-          <p className="mt-7 max-w-lg text-base leading-7 text-white/80 sm:text-lg">
-            {studioConfig.description}
-          </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link href="/booking" className="rounded-full bg-[var(--studio-champagne-gold)] px-6 py-3.5 text-sm font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)]">
-              {studioConfig.hero.bookingLinkLabel}
-            </Link>
-            <Link href="/gallery" className="rounded-full border border-[var(--studio-champagne-gold)] px-6 py-3.5 text-sm font-semibold text-[var(--studio-ivory-white)] transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]">
-              {studioConfig.hero.galleryLinkLabel}
-            </Link>
+    <section aria-label="Featured photography" aria-roledescription="carousel" className="px-4 pb-10 pt-6 sm:px-7 sm:pb-12 sm:pt-8 lg:px-10">
+      <div className="relative isolate mx-auto min-h-[480px] max-w-[1200px] overflow-hidden rounded-[1.25rem] border border-[color-mix(in_srgb,var(--studio-champagne-gold)_28%,transparent)] bg-[var(--color-ink)] shadow-[0_24px_70px_rgba(23,23,23,0.14)] sm:min-h-[520px] lg:min-h-[580px]">
+        {slides.map((item, index) => (
+          <Image
+            key={item.image}
+            src={item.image}
+            alt={item.imageAlt}
+            fill
+            priority={index === 0}
+            sizes="(max-width: 1200px) 92vw, 1200px"
+            style={{ objectPosition: item.objectPosition }}
+            className={`object-cover transition-opacity duration-700 ${
+              index === activeIndex ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))}
+        <div className="relative flex min-h-[480px] flex-col justify-center px-6 py-16 text-white sm:min-h-[520px] sm:px-10 lg:min-h-[580px] lg:px-14">
+          <div className={`${slide.textAlignment === "right" ? "ml-auto max-w-[16rem] sm:max-w-[25rem]" : "max-w-[25rem]"} [text-shadow:0_1px_4px_rgba(0,0,0,0.45)]`}>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80 sm:text-xs">
+              {slide.eyebrow}
+            </p>
+            <h1 aria-live="polite" className="mt-3 whitespace-pre-line font-serif text-4xl leading-[0.98] tracking-tight sm:text-5xl lg:text-6xl">
+              {slide.title}
+            </h1>
+            <p className="mt-4 max-w-md text-sm leading-6 text-white/85">
+              {studioConfig.description}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/booking" className="inline-flex min-h-11 items-center rounded-full bg-[var(--studio-champagne-gold)] px-5 text-xs font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)] sm:text-sm">
+                {studioConfig.hero.bookingLinkLabel}
+              </Link>
+              <Link href="/gallery" className="inline-flex min-h-11 items-center rounded-full border border-[var(--studio-champagne-gold)] px-5 text-xs font-semibold text-[var(--studio-ivory-white)] transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)] sm:text-sm">
+                {studioConfig.hero.galleryLinkLabel}
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="absolute bottom-8 right-5 flex items-center gap-3 sm:right-8">
+        <div className="absolute bottom-4 right-4 flex items-center gap-2 sm:bottom-6 sm:right-6">
           <span aria-live="polite" className="mr-2 text-xs tracking-[0.15em] text-white/70">
             0{activeIndex + 1} / 0{slides.length}
           </span>

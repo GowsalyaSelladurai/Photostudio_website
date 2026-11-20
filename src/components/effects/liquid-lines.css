@@ -1,0 +1,23 @@
+
+.liquid-lines-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .liquid-lines-canvas {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-lines-canvas {
+    display: none;
+  }
+}

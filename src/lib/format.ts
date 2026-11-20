@@ -1,0 +1,9 @@
+import { studioConfig } from "@/config/studio.config";
+
+export function formatPrice(amount: number): string {
+  return new Intl.NumberFormat(studioConfig.locale, {
+    style: "currency",
+    currency: studioConfig.currency,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}

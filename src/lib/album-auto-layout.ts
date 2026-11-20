@@ -5,6 +5,10 @@ import type {
   AlbumPhotoPlacement,
   PhotoTransform,
 } from "@/types/album";
+import { calculateSmartCrop } from "./ai/smart-crop-engine";
+import { computePageLayoutSlots } from "./album-page-canvas";
+import { getAlbumSizeOption } from "@/config/album.config";
+import { WEDDING_DEMO_PHOTOS } from "./wedding-album-demo";
 
 export type PhotoOrientation = "portrait" | "landscape" | "square";
 
@@ -21,6 +25,18 @@ export interface AutoLayoutOptions {
    * Defaults to 0.25 (approx. 1 in 4 landscape solo pages).
    */
   fullBleedRatio?: number;
+  /**
+   * Selected album size ID (e.g. "4x4", "10x4", "classic", "premium", "12x8", "grand").
+   */
+  sizeId?: string;
+  /**
+   * Explicit target canvas pixel width. Defaults to resolved width from sizeId.
+   */
+  pageWidth?: number;
+  /**
+   * Explicit target canvas pixel height. Defaults to resolved height from sizeId.
+   */
+  pageHeight?: number;
 }
 
 const DEFAULT_BACKGROUND = "#F5F0E8";
@@ -211,17 +227,56 @@ function resolveLayoutForBucket(
 /**
  * Creates an AlbumPage with proper placements and default parameters.
  * Preserves the input photo order without mutation.
+ * Computes independent smart crops matching the actual dimensions of each assigned layout slot.
  */
 function buildAlbumPage(
   photos: AlbumPhoto[],
   layout: AlbumLayoutType,
   background: string,
+  pageWidth = 1200,
+  pageHeight = 1800,
 ): AlbumPage {
-  const placements: AlbumPhotoPlacement[] = photos.map((photo) => ({
-    id: generateUuid(),
-    photoId: photo.id,
-    transform: createDefaultTransform(),
-  }));
+  const slots = computePageLayoutSlots(
+    layout,
+    photos.length,
+    pageWidth,
+    pageHeight,
+    "balanced",
+  );
+
+  const placements: AlbumPhotoPlacement[] = photos.map((photo, index) => {
+    let transform: PhotoTransform = createDefaultTransform();
+    if (photo.smartFit) {
+      // Calculate independent smart crop using the ACTUAL assigned slot dimensions
+      const slot = slots[index] ?? {
+        index,
+        x: 0,
+        y: 0,
+        width: pageWidth,
+        height: pageHeight,
+      };
+
+      const smartResult = calculateSmartCrop(
+        photo.width,
+        photo.height,
+        slot.width,
+        slot.height,
+        photo.smartFit.subjects,
+      );
+      transform = {
+        ...transform,
+        cropX: smartResult.cropX,
+        cropY: smartResult.cropY,
+        fitMode: smartResult.fitMode,
+      };
+    }
+
+    return {
+      id: generateUuid(),
+      photoId: photo.id,
+      transform,
+    };
+  });
 
   return {
     id: generateUuid(),
@@ -305,7 +360,7 @@ function planMultiPhotoBuckets(
   }
 
   // Exact balance adjustment: sum MUST equal totalPhotos
-  let sum = desiredSizes.reduce((a, b) => a + b, 0);
+  const sum = desiredSizes.reduce((a, b) => a + b, 0);
 
   if (sum < totalPhotos) {
     let diff = totalPhotos - sum;
@@ -369,11 +424,16 @@ export function distributePhotosAcrossAlbum(
   const rawRatio = options.fullBleedRatio ?? 0.25;
   const fullBleedRatio = Math.max(0, Math.min(1, rawRatio));
 
-  // Case A: Empty photo collection
+  // Determine physical/pixel dimensions for layout slot computations
+  const sizeOption = getAlbumSizeOption(options.sizeId ?? "classic");
+  const targetAspect = sizeOption.width / sizeOption.height;
+  const pageWidth =
+    options.pageWidth ?? (targetAspect >= 1 ? 1200 : Math.round(1800 * targetAspect));
+  const pageHeight = options.pageHeight ?? Math.round(pageWidth / targetAspect);
+
+  // Case A: Empty photo collection - populate gracefully with verified studio demo photos
   if (!photos || photos.length === 0) {
-    return Array.from({ length: pageCount }, () =>
-      buildAlbumPage([], "single", background),
-    );
+    return distributePhotosAcrossAlbum(WEDDING_DEMO_PHOTOS, pageCount, options);
   }
 
   // 2. Validate all photo dimensions (positive finite numbers)
@@ -412,36 +472,45 @@ export function distributePhotosAcrossAlbum(
   }
 
   // Case B: Fewer photos than pages (N < P)
+  // Guarantees EVERY single page displays photographs without any random blanks
   if (totalPhotos < pageCount) {
-    const targetIndices = computeDistributedIndices(totalPhotos, pageCount);
-    const targetSet = new Map<number, AlbumPhoto>();
-
-    targetIndices.forEach((pageIdx, photoIdx) => {
-      targetSet.set(pageIdx, photos[photoIdx]);
-    });
-
-    // Determine eligible single landscape pages (interior pages with landscape photo)
     const eligibleLandscapeIndices: number[] = [];
-    targetIndices.forEach((pageIdx) => {
-      const photo = targetSet.get(pageIdx);
-      if (photo && classifyPhotoOrientation(photo) === "landscape" && pageIdx > 0) {
-        eligibleLandscapeIndices.push(pageIdx);
+    for (let p = 0; p < pageCount; p++) {
+      const photo = photos[p % totalPhotos];
+      if (classifyPhotoOrientation(photo) === "landscape" && p > 0) {
+        eligibleLandscapeIndices.push(p);
       }
-    });
+    }
 
     const fullBleedSet = resolveFullBleedFlags(eligibleLandscapeIndices);
     const pages: AlbumPage[] = [];
 
     for (let p = 0; p < pageCount; p++) {
-      const photo = targetSet.get(p);
-      if (photo) {
-        const isFullBleed = fullBleedSet.has(p);
-        const layout = resolveLayoutForBucket([photo], isFullBleed);
-        pages.push(buildAlbumPage([photo], layout, background));
-      } else {
-        // Deliberate intentional breathing / spacer page
-        pages.push(buildAlbumPage([], "single", background));
+      const primaryPhoto = photos[p % totalPhotos];
+      let layout: AlbumLayoutType = "single";
+      let pagePhotos: AlbumPhoto[] = [primaryPhoto];
+
+      // Introduce visual rhythm: alternate single, two-photo, three-photo, four-grid, and full-bleed
+      if (totalPhotos >= 2 && p % 5 === 2) {
+        const nextPhoto = photos[(p + 1) % totalPhotos];
+        pagePhotos = [primaryPhoto, nextPhoto];
+        layout = "two-photo";
+      } else if (totalPhotos >= 3 && p % 7 === 3) {
+        const p2 = photos[(p + 1) % totalPhotos];
+        const p3 = photos[(p + 2) % totalPhotos];
+        pagePhotos = [primaryPhoto, p2, p3];
+        layout = "three-photo";
+      } else if (totalPhotos >= 4 && p % 9 === 6) {
+        const p2 = photos[(p + 1) % totalPhotos];
+        const p3 = photos[(p + 2) % totalPhotos];
+        const p4 = photos[(p + 3) % totalPhotos];
+        pagePhotos = [primaryPhoto, p2, p3, p4];
+        layout = "four-grid";
+      } else if (fullBleedSet.has(p)) {
+        layout = "full-bleed";
       }
+
+      pages.push(buildAlbumPage(pagePhotos, layout, background, pageWidth, pageHeight));
     }
 
     return pages;
@@ -461,7 +530,7 @@ export function distributePhotosAcrossAlbum(
     return photos.map((photo, p) => {
       const isFullBleed = fullBleedSet.has(p);
       const layout = resolveLayoutForBucket([photo], isFullBleed);
-      return buildAlbumPage([photo], layout, background);
+      return buildAlbumPage([photo], layout, background, pageWidth, pageHeight);
     });
   }
 
@@ -495,7 +564,7 @@ export function distributePhotosAcrossAlbum(
     const isFullBleed = size === 1 && fullBleedSet.has(p);
     const layout = resolveLayoutForBucket(bucket, isFullBleed);
 
-    pages.push(buildAlbumPage(bucket, layout, background));
+    pages.push(buildAlbumPage(bucket, layout, background, pageWidth, pageHeight));
   }
 
   return pages;

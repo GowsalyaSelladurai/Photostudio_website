@@ -204,7 +204,7 @@ export const heroBanner = {
   title: "We love telling\nyour story.",
   description:
     // "Soulful wedding films, from the first ritual to the last blessing, kept the way it felt.",
-    "A wedding film is more than just a visual story—it’s a heartfelt journey that captures the essence of love, emotion, and memories that last a lifetime. At Mystic Studios, we bring your story to life with soulful, earthy films that speak to the heart, filled with lively moments and perfectly timed sounds that echo your love.",
+    "A wedding film is more than just a visual story—it’s a heartfelt journey that captures the essence of love, emotion, and memories that last a lifetime. At Studio Frame, we bring your story to life with soulful, earthy films that speak to the heart, filled with lively moments and perfectly timed sounds that echo your love.",
   ctaLabel: "Plan your film",
   intervalMs: 5000,
   poster: "/videos/posters/top-banner-1.jpg",

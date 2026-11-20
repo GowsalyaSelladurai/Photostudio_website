@@ -11,6 +11,28 @@ export type AlbumCoverFinish = "linen" | "leather" | "photo";
 
 export type AlbumOrientation = "portrait" | "landscape" | "square";
 
+export type PhotoSubjectType = "face" | "person";
+
+export type PhotoSubjectBox = {
+  x: number; // normalized [0, 1] relative to image width
+  y: number; // normalized [0, 1] relative to image height
+  width: number; // normalized [0, 1]
+  height: number; // normalized [0, 1]
+  confidence: number; // [0, 1]
+  type: PhotoSubjectType;
+  label?: string;
+};
+
+export type PhotoSmartMetadata = {
+  analyzedAt: number;
+  subjects: PhotoSubjectBox[];
+  primaryAnchor: { x: number; y: number }; // normalized [0, 1]
+  recommendedFitMode?: "cover" | "contain";
+  aspectRatio: number;
+  faceCount: number;
+  personCount: number;
+};
+
 export type AlbumPhoto = {
   id: string;
   fileName: string;
@@ -19,7 +41,10 @@ export type AlbumPhoto = {
   height: number;
   fileSize: number;
   uploadedAt: number;
+  smartFit?: PhotoSmartMetadata;
 };
+
+export type PhotoFitMode = "cover" | "contain";
 
 export type PhotoTransform = {
   x: number;
@@ -28,6 +53,7 @@ export type PhotoTransform = {
   rotation: number;
   cropX: number;
   cropY: number;
+  fitMode?: PhotoFitMode;
 };
 
 export type AlbumPhotoPlacement = {

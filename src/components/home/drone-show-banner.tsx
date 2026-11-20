@@ -249,7 +249,22 @@ function CinemaDrone({ scale = 0.9 }: { scale?: number }) {
    MAIN DRONE BANNER
 ===================================================== */
 
-export function DroneShowBanner() {
+
+// This flag belongs to the current browser document. It survives Next.js
+// client-side navigation and React remounts, but resets on a real page reload.
+type DroneIntroWindow = Window & {
+  __studioFrameDroneIntroHandled?: boolean;
+};
+
+type DroneShowBannerProps = {
+  introOnly?: boolean; // layout.tsx: intro overlay mattum render aagum
+  showIntro?: boolean; // page.tsx: false kudutha intro varaadhu
+};
+
+export function DroneShowBanner({
+  introOnly = false,
+  showIntro = true,
+}: DroneShowBannerProps) {
   const [introVisible, setIntroVisible] = useState(true);
   const [currentPhoto, setCurrentPhoto] = useState(0);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
@@ -258,6 +273,38 @@ export function DroneShowBanner() {
   const objectUrls = useRef<string[]>([]);
 
   const photos = uploadedPhotos.length > 0 ? uploadedPhotos : samplePhotos;
+
+  const closeIntro = () => {
+    (window as DroneIntroWindow).__studioFrameDroneIntroHandled = true;
+    setIntroVisible(false);
+  };
+
+  // Intro timer (real reload-la mattum odum)
+  useEffect(() => {
+    if (!showIntro) return;
+
+    // Already intro kaatiyaachu na (client navigation / remount) udane hide
+    if ((window as DroneIntroWindow).__studioFrameDroneIntroHandled) {
+      setIntroVisible(false);
+      return;
+    }
+
+    const timer = window.setTimeout(closeIntro, 8300);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showIntro]);
+
+  // Intro odum bodhu scroll lock
+  useEffect(() => {
+    if (!introVisible) return;
+
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [introVisible]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -366,95 +413,98 @@ export function DroneShowBanner() {
           HOMEPAGE DRONE SHOW
       ================================================= */}
 
-      <section className="sf-drone-section">
-        <div className="sf-banner-glow sf-glow-one" />
-        <div className="sf-banner-glow sf-glow-two" />
+      {!introOnly && (
+        <section className="sf-drone-section">
+          <div className="sf-banner-glow sf-glow-one" />
+          <div className="sf-banner-glow sf-glow-two" />
 
-        <div className="sf-drone-container">
-          <div className="sf-drone-content">
-            <div className="sf-eyebrow">
-              <Sparkles size={16} />
-              THE NEXT LEVEL OF PHOTOGRAPHY
+          <div className="sf-drone-container">
+            <div className="sf-drone-content">
+              <div className="sf-eyebrow">
+                <Sparkles size={16} />
+                THE NEXT LEVEL OF PHOTOGRAPHY
+              </div>
+
+              <h2>
+                Your Memories.
+                <br />
+                <span>In the Sky.</span>
+              </h2>
+
+              <p>
+                Turn your favourite photographs into a cinematic
+                drone-show experience. Create your own show and
+                share your memories with everyone.
+              </p>
+
+              <div className="sf-drone-actions">
+                <label className="sf-upload-button">
+                  <Upload size={18} />
+                  Upload Your Photos
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    hidden
+                    onChange={handleUpload}
+                  />
+                </label>
+
+                <Link href="/gallery" className="sf-explore-button">
+                  Explore Gallery
+                  <ArrowRight size={17} />
+                </Link>
+              </div>
+
+              {showUploadMessage && (
+                <div className="sf-upload-message">
+                  <Images size={16} />
+                  {uploadedPhotos.length} photos added to your preview.
+                </div>
+              )}
+
+              <div className="sf-live-status">
+                <span className="sf-live-dot" />
+                AUTOMATIC PHOTO EXPERIENCE
+              </div>
             </div>
 
-            <h2>
-              Your Memories.
-              <br />
-              <span>In the Sky.</span>
-            </h2>
+            <div className="sf-drone-stage">
+              <div className="sf-orbit sf-orbit-one" />
+              <div className="sf-orbit sf-orbit-two" />
 
-            <p>
-              Turn your favourite photographs into a cinematic
-              drone-show experience. Create your own show and
-              share your memories with everyone.
-            </p>
+              <div className="sf-banner-drone">
+                <CinemaDrone scale={0.9} />
+              </div>
 
-            <div className="sf-drone-actions">
-              <label className="sf-upload-button">
-                <Upload size={18} />
-                Upload Your Photos
+              <div className="sf-banner-beam" />
 
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  hidden
-                  onChange={handleUpload}
+              <div className="sf-banner-photo">
+                <img
+                  key={photos[currentPhoto]}
+                  src={photos[currentPhoto]}
+                  alt="Drone show photo slideshow"
                 />
-              </label>
 
-              <Link href="/gallery" className="sf-explore-button">
-                Explore Gallery
-                <ArrowRight size={17} />
-              </Link>
-            </div>
-
-            {showUploadMessage && (
-              <div className="sf-upload-message">
-                <Images size={16} />
-                {uploadedPhotos.length} photos added to your preview.
+                <div className="sf-projection-label">
+                  <span>STUDIOFRAME</span>
+                  <span>
+                    {String(currentPhoto + 1).padStart(2, "0")} /{" "}
+                    {String(photos.length).padStart(2, "0")}
+                  </span>
+                </div>
               </div>
-            )}
 
-            <div className="sf-live-status">
-              <span className="sf-live-dot" />
-              AUTOMATIC PHOTO EXPERIENCE
-            </div>
-          </div>
-
-          <div className="sf-drone-stage">
-            <div className="sf-orbit sf-orbit-one" />
-            <div className="sf-orbit sf-orbit-two" />
-
-            <div className="sf-banner-drone">
-              <CinemaDrone scale={0.9} />
-            </div>
-
-            <div className="sf-banner-beam" />
-
-            <div className="sf-banner-photo">
-              <img
-                key={photos[currentPhoto]}
-                src={photos[currentPhoto]}
-                alt="Drone show photo slideshow"
-              />
-
-              <div className="sf-projection-label">
-                <span>STUDIOFRAME</span>
-                <span>
-                  {String(currentPhoto + 1).padStart(2, "0")} /{" "}
-                  {String(photos.length).padStart(2, "0")}
-                </span>
+              <div className="sf-stage-caption">
+                <span className="sf-live-dot" />
+                LIVE MEMORY PREVIEW
               </div>
             </div>
-
-            <div className="sf-stage-caption">
-              <span className="sf-live-dot" />
-              LIVE MEMORY PREVIEW
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
 
       {/* =================================================
           STYLES
@@ -697,8 +747,13 @@ export function DroneShowBanner() {
           position: relative;
           isolation: isolate;
           overflow: hidden;
-          min-height: 590px;
-          padding: 90px 7%;
+          box-sizing: border-box;
+          width: calc(100% - 3rem);
+          max-width: 1200px;
+          min-height: 0;
+          margin: 24px auto;
+          padding: 44px clamp(24px, 4%, 48px);
+          border-radius: 24px;
           color: white;
           background: linear-gradient(115deg, #090d1c, #15132c 55%, #101c2c);
         }
@@ -731,8 +786,8 @@ export function DroneShowBanner() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           align-items: center;
-          gap: 55px;
-          max-width: 1250px;
+          gap: 32px;
+          max-width: 1100px;
           margin: auto;
         }
 
@@ -746,11 +801,11 @@ export function DroneShowBanner() {
         }
 
         .sf-drone-content h2 {
-          margin: 22px 0;
+          margin: 14px 0;
           color: white;
-          font-size: clamp(42px, 5vw, 66px);
+          font-size: clamp(36px, 4.2vw, 56px);
           line-height: 1.08;
-          letter-spacing: -2px;
+          letter-spacing: -1.5px;
         }
 
         .sf-drone-content h2 span {
@@ -761,14 +816,14 @@ export function DroneShowBanner() {
           max-width: 490px;
           color: #c4c3d2;
           font-size: 15px;
-          line-height: 1.9;
+          line-height: 1.7;
         }
 
         .sf-drone-actions {
           display: flex;
           flex-wrap: wrap;
           gap: 14px;
-          margin-top: 30px;
+          margin-top: 22px;
         }
 
         .sf-upload-button,
@@ -820,7 +875,7 @@ export function DroneShowBanner() {
           display: flex;
           align-items: center;
           gap: 10px;
-          margin-top: 35px;
+          margin-top: 24px;
           color: #9999b2;
           font-size: 10px;
           letter-spacing: 2px;
@@ -842,7 +897,7 @@ export function DroneShowBanner() {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 430px;
+          min-height: 370px;
         }
 
         .sf-orbit {
@@ -866,26 +921,26 @@ export function DroneShowBanner() {
           top: 0;
           z-index: 20;
           width: 100%;
-          height: 280px;
+          height: 240px;
           animation: sfDroneHover 3s ease-in-out infinite;
         }
 
         .sf-banner-beam {
           position: absolute;
-          top: 175px;
+          top: 140px;
           width: 0;
           height: 0;
           border-left: 130px solid transparent;
           border-right: 130px solid transparent;
-          border-top: 235px solid #b7a0ff25;
+          border-top: 190px solid #b7a0ff25;
           filter: blur(4px);
         }
 
         .sf-banner-photo {
           position: absolute;
-          top: 245px;
+          top: 190px;
           z-index: 2;
-          width: min(350px, 80%);
+          width: min(300px, 80%);
           aspect-ratio: 16 / 9;
           overflow: hidden;
           border: 1px solid #bba2ff99;
@@ -1031,12 +1086,13 @@ export function DroneShowBanner() {
 
         @media (max-width: 800px) {
           .sf-drone-section {
-            padding: 65px 6%;
+            width: calc(100% - 2rem);
+            padding: 36px 5%;
           }
 
           .sf-drone-container {
             grid-template-columns: 1fr;
-            gap: 25px;
+            gap: 16px;
           }
 
           .sf-drone-content {
@@ -1056,13 +1112,24 @@ export function DroneShowBanner() {
           }
 
           .sf-drone-stage {
-            min-height: 430px;
+            min-height: 360px;
+          }
+
+          .sf-banner-photo {
+            top: 180px;
           }
         }
 
         /* MOBILE */
 
         @media (max-width: 600px) {
+          .sf-drone-section {
+            width: calc(100% - 1.5rem);
+            margin: 16px auto;
+            padding: 30px 16px;
+            border-radius: 20px;
+          }
+
           .sf-welcome-heading {
             top: 11%;
           }
@@ -1109,7 +1176,7 @@ export function DroneShowBanner() {
           }
 
           .sf-drone-content h2 {
-            font-size: 43px;
+            font-size: clamp(34px, 10vw, 40px);
           }
 
           .sf-drone-actions {
@@ -1122,8 +1189,25 @@ export function DroneShowBanner() {
           }
 
           .sf-drone-stage {
-            transform: scale(0.9);
-            margin: -10px -15px;
+            min-height: 300px;
+            margin: 0;
+            transform: none;
+          }
+
+          .sf-banner-drone {
+            height: 210px;
+          }
+
+          .sf-banner-beam {
+            top: 105px;
+            border-left-width: 100px;
+            border-right-width: 100px;
+            border-top-width: 160px;
+          }
+
+          .sf-banner-photo {
+            top: 145px;
+            width: min(250px, 80%);
           }
         }
 

@@ -403,6 +403,20 @@ type AlbumSizePriceOption = PriceOption & {
 export const albumPricing = {
   sizes: [
     {
+      id: "4x4",
+      label: "4 × 4 inches",
+      width: 4,
+      height: 4,
+      amount: 250,
+    },
+    {
+      id: "10x4",
+      label: "10 × 4 inches",
+      width: 10,
+      height: 4,
+      amount: 350,
+    },
+    {
       id: "classic",
       label: "8 × 12 inches",
       width: 8,
@@ -415,6 +429,13 @@ export const albumPricing = {
       width: 10,
       height: 12,
       amount: 400,
+    },
+    {
+      id: "12x8",
+      label: "12 × 8 inches",
+      width: 12,
+      height: 8,
+      amount: 420,
     },
     {
       id: "grand",

@@ -21,8 +21,8 @@ const navigation = [
 export function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-   const [journeysOpen, setJourneysOpen] = useState(false);
-
+  const [journeysOpen, setJourneysOpen] = useState(false);
+  const [journeysPinned, setJourneysPinned] = useState(false);
   const isJourneyActive = pathname.startsWith("/journeys/");
 
   return (
@@ -65,14 +65,27 @@ export function SiteHeader() {
           {navigation.map((item) => {
             if ("dropdown" in item) {
               return (
-                <div key="journeys" className="group relative">
+                <div
+                  key="journeys"
+                  className="group relative"
+                  onMouseEnter={() => setJourneysOpen(true)}
+                  onMouseLeave={() => {
+                    if (!journeysPinned) {
+                      setJourneysOpen(false);
+                    }
+                  }}
+                >
 
                   {/* Journeys Button */}
                   <button
                     type="button"
                     aria-expanded={journeysOpen}
                     aria-current={isJourneyActive ? "page" : undefined}
-                    onClick={() => setJourneysOpen((open) => !open)}
+                    onClick={() => {
+                      const nextPinned = !journeysPinned;
+                      setJourneysPinned(nextPinned);
+                      setJourneysOpen(nextPinned);
+                    }}
                     className={`relative inline-flex min-h-11 w-full items-center px-3 text-left text-sm transition-colors duration-300 after:absolute after:inset-x-3 after:bottom-1 after:h-px after:origin-left after:bg-[var(--studio-champagne-gold)] after:transition-transform xl:w-auto ${
                       isJourneyActive
                         ? "font-semibold text-[var(--studio-midnight-black)] after:scale-x-100"
@@ -88,8 +101,8 @@ export function SiteHeader() {
                       journeysOpen
                         ? "visible pointer-events-auto translate-y-0 opacity-100"
                         : "invisible pointer-events-none translate-y-3 opacity-0"
-                    } absolute left-0 top-full z-50 mt-3 w-[250px] origin-top rounded-xl border border-[color-mix(in_srgb,var(--studio-champagne-gold)_35%,transparent)] bg-[var(--studio-midnight-black)] py-3 shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out xl:group-hover:visible xl:group-hover:pointer-events-auto xl:group-hover:translate-y-0 xl:group-hover:opacity-100 xl:group-focus-within:visible xl:group-focus-within:pointer-events-auto xl:group-focus-within:translate-y-0`}
-                  >
+                    } absolute left-0 top-full z-50 mt-3 w-[250px] origin-top rounded-xl border border-[color-mix(in_srgb,var(--studio-champagne-gold)_35%,transparent)] bg-[var(--studio-midnight-black)] py-3 shadow-[0_18px_45px_rgba(0,0,0,0.35)] transition-all duration-300 ease-out `}
+                  >   
 
                     {destinations.map((destination) => {
                       const active =
@@ -102,6 +115,7 @@ export function SiteHeader() {
                           onClick={() => {
                             setMenuOpen(false);
                             setJourneysOpen(false);
+                            setJourneysPinned(false);
                           }}
                           className={`group/item flex items-center justify-between px-6 py-3 font-serif text-base italic transition-all duration-300 hover:translate-x-1 hover:bg-[var(--studio-deep-charcoal)] hover:text-[var(--studio-champagne-gold)] ${
                             active

@@ -388,4 +388,34 @@ h6 {
   }
 }
 
+/* ==========================================
+   STUDIOFRAME - INSTAGRAM MARQUEE ANIMATIONS
+========================================== */
 
+@keyframes instagram-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes instagram-right {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@utility animate-instagram-left {
+  animation: instagram-left 75s linear infinite;
+}
+
+@utility animate-instagram-right {
+  animation: instagram-right 85s linear infinite;
+}

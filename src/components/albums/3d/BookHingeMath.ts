@@ -3,6 +3,81 @@
  * realistic 3D hardcover opening and closing cinematic animations.
  */
 
+import { getAlbumSizeOption } from "@/config/album.config";
+
+export interface BookPhysicalDimensions {
+  pageWidth: number;
+  pageHeight: number;
+  spreadWidth: number;
+  aspectRatio: number;
+  boardThickness: number;
+  overhangX: number;
+  overhangY: number;
+  stackDepth: number;
+  spineWidth: number;
+  cameraDistance: number;
+}
+
+export function computeBookDimensions(
+  sizeId: string,
+  pageCount: number,
+): BookPhysicalDimensions {
+  const sizeConfig = getAlbumSizeOption(sizeId);
+
+  const scalePerInch = 0.22;
+  const pageWidth = sizeConfig.width * scalePerInch;
+  const pageHeight = sizeConfig.height * scalePerInch;
+  const spreadWidth = pageWidth * 2;
+  const aspectRatio = sizeConfig.width / sizeConfig.height;
+
+  // Proportional hardcover thickness and square overhang
+  const boardThickness = 0.035;
+  const overhangX = 0.05 * (pageWidth / 1.8);
+  const overhangY = 0.05 * (pageHeight / 1.8);
+
+  // Stack depth increases naturally with page count (20 to 60 pages)
+  const clampedPages = Math.max(20, Math.min(60, pageCount));
+  const stackDepth = 0.03 + (clampedPages - 20) * 0.0015;
+  const spineWidth = stackDepth * 1.6 + 0.08;
+
+  // Camera framing distance strictly preserving true visual proportions and aspect ratio
+  // Field of view is vertical 30 deg. tan(15 deg) = 0.26795.
+  const totalW = spreadWidth + overhangX * 2 + 0.12;
+  const totalH = pageHeight + overhangY * 2 + 0.12;
+  const tanHalfFov = Math.tan((30 * Math.PI) / 360);
+  // Target: open book occupies ~78-82% of preview width on standard desktop (~1.62 aspect viewport)
+  const distForWidth = totalW / (0.80 * 2 * tanHalfFov * 1.62);
+  // Height target: spread occupies ~75-80% of preview height with natural reading tilt
+  const distForHeight = (totalH * 0.88) / (0.78 * 2 * tanHalfFov);
+  const cameraDistance = Math.max(distForWidth, distForHeight, 2.2);
+
+  return {
+    pageWidth,
+    pageHeight,
+    spreadWidth,
+    aspectRatio,
+    boardThickness,
+    overhangX,
+    overhangY,
+    stackDepth,
+    spineWidth,
+    cameraDistance,
+  };
+}
+
+export function getTotalSpreads(pageCount: number): number {
+  return Math.max(1, Math.ceil(pageCount / 2));
+}
+
+export function getSpreadPageIndices(
+  spreadIndex: number,
+  totalPages: number,
+): { leftIndex: number; rightIndex: number } {
+  const leftIndex = spreadIndex * 2;
+  const rightIndex = leftIndex + 1 < totalPages ? leftIndex + 1 : -1;
+  return { leftIndex, rightIndex };
+}
+
 export type BookViewState = "closed" | "opening" | "opened" | "closing";
 
 export const COVER_ANIMATION_DURATION_SECONDS = 1.4;
@@ -60,19 +135,19 @@ export function interpolateCameraPose(
 } {
   const eased = easeInOutCosine(progress);
 
-  // Closed beauty perspective: slightly right of center, looking at cover
+  // Closed beauty perspective: slightly to the right, elevated viewing of cover foil title and spine
   const closedPos: [number, number, number] = [
-    0.15,
-    -pageHeight * 0.12,
-    cameraDistance * 0.95,
+    cameraDistance * 0.16,
+    cameraDistance * 0.44,
+    cameraDistance * 0.88,
   ];
-  const closedLookAt: [number, number, number] = [0, -0.05, 0];
+  const closedLookAt: [number, number, number] = [-0.05, 0, 0];
 
-  // Open spread perspective: centered, slightly elevated for spread viewing
+  // Open spread perspective: centered, natural elevated front-facing viewing perspective looking directly down at the open pages
   const openPos: [number, number, number] = [
     0,
-    -pageHeight * 0.22,
-    cameraDistance,
+    cameraDistance * 0.48,
+    cameraDistance * 0.88,
   ];
   const openLookAt: [number, number, number] = [0, 0, 0];
 
@@ -93,6 +168,8 @@ export function interpolateCameraPose(
 /**
  * Interpolates whole book group position and rotation from the closed
  * three-quarter product beauty angle to the centered open spread angle.
+ * Album lies open naturally on the horizontal table plane rather than appearing
+ * standing vertically or facing downward toward the floor.
  */
 export function interpolateBookTransform(
   progress: number,
@@ -103,13 +180,13 @@ export function interpolateBookTransform(
 } {
   const eased = easeInOutCosine(progress);
 
-  // Closed pose: angled three-quarter view showing cover foil, spine arc, and paper thickness
-  const closedRot: [number, number, number] = [0.34, -0.42, 0.14];
-  const closedPos: [number, number, number] = [-0.1, -0.05, 0];
+  // Closed pose: resting on table plane, rotated slightly in Y to reveal front cover foil & spine
+  const closedRot: [number, number, number] = [-1.08, -0.38, 0.06];
+  const closedPos: [number, number, number] = [-0.06, 0, 0];
 
-  // Open pose: spine shifted to center world X=0, tilted slightly towards camera
-  const openRot: [number, number, number] = [0.42, 0, 0];
-  const openPos: [number, number, number] = [pageWidth / 2, -0.05, 0];
+  // Open pose: lying open naturally on the table, spine centered at world X=0, top tilted away from camera so pages face directly up toward viewer
+  const openRot: [number, number, number] = [-1.08, 0, 0];
+  const openPos: [number, number, number] = [pageWidth / 2, 0, 0];
 
   const rotX = closedRot[0] + (openRot[0] - closedRot[0]) * eased;
   const rotY = closedRot[1] + (openRot[1] - closedRot[1]) * eased;

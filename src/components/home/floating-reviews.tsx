@@ -188,11 +188,15 @@ export function FloatingReviews() {
 
       <style jsx>{`
         .sf-reviews {
+          box-sizing: border-box;
           position: relative;
-          width: 100%;
+          width: calc(100% - 3rem);
+          max-width: 1200px;
+          margin: 24px auto;
           overflow: hidden;
           isolation: isolate;
-          padding: 110px 24px 75px;
+          padding: 34px 20px 22px;
+          border-radius: 24px;
           color: #fff;
           background:
             radial-gradient(
@@ -211,7 +215,7 @@ export function FloatingReviews() {
         .sf-review-container {
           position: relative;
           z-index: 2;
-          max-width: 1250px;
+          max-width: 1000px;
           margin: 0 auto;
         }
 
@@ -255,13 +259,13 @@ export function FloatingReviews() {
           font-size: 10px;
           font-weight: 700;
           letter-spacing: 3px;
-          margin-bottom: 22px;
+          margin-bottom: 16px;
         }
 
         .sf-review-heading h2 {
           margin: 0;
           font-family: Georgia, "Times New Roman", serif;
-          font-size: clamp(42px, 6vw, 72px);
+          font-size: clamp(36px, 5vw, 58px);
           font-weight: 400;
           line-height: 1.05;
           letter-spacing: -2px;
@@ -274,10 +278,10 @@ export function FloatingReviews() {
 
         .sf-review-heading p {
           max-width: 430px;
-          margin: 22px auto 0;
+          margin: 16px auto 0;
           color: #aaa5b2;
           font-size: 14px;
-          line-height: 1.8;
+          line-height: 1.65;
         }
 
         /* Orbit stage */
@@ -286,8 +290,8 @@ export function FloatingReviews() {
           position: relative;
           width: 100%;
           max-width: 1050px;
-          height: 700px;
-          margin: 25px auto 0;
+          height: 440px;
+          margin: 14px auto 0;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -304,20 +308,20 @@ export function FloatingReviews() {
         }
 
         .sf-ring-one {
-          width: 370px;
-          height: 370px;
+          width: 280px;
+          height: 280px;
         }
 
         .sf-ring-two {
-          width: 550px;
-          height: 550px;
+          width: 370px;
+          height: 370px;
           border-style: dashed;
           border-color: rgba(216, 183, 125, 0.12);
         }
 
         .sf-ring-three {
-          width: 680px;
-          height: 680px;
+          width: 460px;
+          height: 460px;
           border-color: rgba(255, 255, 255, 0.045);
         }
 
@@ -326,8 +330,8 @@ export function FloatingReviews() {
         .sf-review-center {
           position: relative;
           z-index: 3;
-          width: 245px;
-          height: 245px;
+          width: 200px;
+          height: 200px;
           padding: 9px;
           border-radius: 50%;
           background: linear-gradient(
@@ -409,7 +413,7 @@ export function FloatingReviews() {
           z-index: 5;
           width: 0;
           height: 0;
-          --radius: 300px;
+          --radius: 145px;
           --duration: 36s;
           --delay: 0s;
           animation: sfOrbit var(--duration) linear infinite;
@@ -423,22 +427,22 @@ export function FloatingReviews() {
         }
 
         .sf-path-1 {
-          --radius: 300px;
+          --radius: 145px;
           --delay: 0s;
         }
 
         .sf-path-2 {
-          --radius: 300px;
+          --radius: 145px;
           --delay: -9s;
         }
 
         .sf-path-3 {
-          --radius: 300px;
+          --radius: 145px;
           --delay: -18s;
         }
 
         .sf-path-4 {
-          --radius: 300px;
+          --radius: 145px;
           --delay: -27s;
         }
 
@@ -446,8 +450,8 @@ export function FloatingReviews() {
           position: absolute;
           top: 0;
           left: 0;
-          width: 255px;
-          padding: 19px;
+          width: 225px;
+          padding: 12px;
           border: 1px solid rgba(255, 255, 255, 0.13);
           border-radius: 17px;
           background: rgba(28, 26, 36, 0.88);
@@ -475,7 +479,7 @@ export function FloatingReviews() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 15px;
+          margin-bottom: 10px;
         }
 
         .sf-quote-icon {
@@ -496,17 +500,17 @@ export function FloatingReviews() {
         }
 
         .sf-review-message {
-          min-height: 83px;
+          min-height: 56px;
           margin: 0;
           color: #e4e0e9;
           font-family: Georgia, serif;
-          font-size: 14px;
-          line-height: 1.65;
+          font-size: 13px;
+          line-height: 1.5;
         }
 
         .sf-card-divider {
           height: 1px;
-          margin: 16px 0 13px;
+          margin: 10px 0 9px;
           background: rgba(255, 255, 255, 0.09);
         }
 
@@ -670,39 +674,39 @@ export function FloatingReviews() {
 
         @media (max-width: 900px) {
           .sf-orbit-stage {
-            height: 650px;
+            height: 380px;
           }
 
           .sf-path-1,
           .sf-path-2,
           .sf-path-3,
           .sf-path-4 {
-            --radius: 245px;
+            --radius: 120px;
           }
 
           .sf-ring-one {
-            width: 310px;
-            height: 310px;
+            width: 250px;
+            height: 250px;
           }
 
           .sf-ring-two {
-            width: 450px;
-            height: 450px;
+            width: 340px;
+            height: 340px;
           }
 
           .sf-ring-three {
-            width: 540px;
-            height: 540px;
+            width: 420px;
+            height: 420px;
           }
 
           .sf-review-card {
-            width: 225px;
-            padding: 15px;
+            width: 200px;
+            padding: 12px;
           }
 
           .sf-review-message {
             font-size: 12px;
-            min-height: 75px;
+            min-height: 52px;
           }
         }
 
@@ -710,11 +714,14 @@ export function FloatingReviews() {
 
         @media (max-width: 600px) {
           .sf-reviews {
-            padding: 75px 12px 55px;
+            width: calc(100% - 1.5rem);
+            margin: 16px auto;
+            padding: 36px 12px 24px;
+            border-radius: 20px;
           }
 
           .sf-review-heading h2 {
-            font-size: 43px;
+            font-size: clamp(34px, 9vw, 40px);
             letter-spacing: -1.5px;
           }
 
@@ -724,8 +731,8 @@ export function FloatingReviews() {
           }
 
           .sf-orbit-stage {
-            height: 520px;
-            margin-top: 15px;
+            height: 300px;
+            margin-top: 12px;
           }
 
           .sf-review-center {
@@ -773,13 +780,13 @@ export function FloatingReviews() {
           .sf-path-2,
           .sf-path-3,
           .sf-path-4 {
-            --radius: 128px;
+            --radius: clamp(38px, 12.5vw, 49px);
             --duration: 32s;
           }
 
           .sf-review-card {
-            width: 128px;
-            padding: 9px;
+            width: 100px;
+            padding: 7px;
             border-radius: 12px;
           }
 
@@ -808,8 +815,8 @@ export function FloatingReviews() {
           }
 
           .sf-review-message {
-            min-height: 95px;
-            font-size: 10px;
+            min-height: 0;
+            font-size: 9px;
             line-height: 1.5;
           }
 
@@ -845,18 +852,18 @@ export function FloatingReviews() {
           }
 
           .sf-ring-one {
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
           }
 
           .sf-ring-two {
-            width: 290px;
-            height: 290px;
+            width: 250px;
+            height: 250px;
           }
 
           .sf-ring-three {
-            width: 380px;
-            height: 380px;
+            width: 330px;
+            height: 330px;
           }
 
           .sf-decoration-one {

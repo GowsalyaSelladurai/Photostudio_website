@@ -144,7 +144,7 @@ export default function FilmPage() {
           <ButtonLink
             href="/contact"
             variant="light"
-            className="bg-transparent text-[var(--studio-midnight-black)] ring-1 ring-[var(--studio-champagne-gold)] hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
+            // className="bg-transparent text-[var(--studio-midnight-black)] ring-1 ring-[var(--studio-champagne-gold)] hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
           >
             {closing.secondaryLabel}
           </ButtonLink>

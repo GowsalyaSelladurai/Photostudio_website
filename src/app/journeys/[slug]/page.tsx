@@ -293,7 +293,7 @@ export default async function JourneyPage({
           </p>
 
           <Link
-            href="/booking"
+            href="/contact"
             className="mt-6 inline-flex items-center gap-4 rounded-full bg-[var(--studio-champagne-gold)] px-9 py-3 text-sm font-semibold text-[var(--studio-deep-charcoal)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
           >
             Enquire Now

@@ -1,13 +1,14 @@
-import Link from "next/link";
+
 import { HeroCarousel } from "@/components/home/hero-carousel";
-import { FeaturedGallery } from "@/components/home/featured-gallery";
+// import { FeaturedGallery } from "@/components/home/featured-gallery";
 import { DroneShowBanner } from "@/components/home/drone-show-banner";
 import { FloatingReviews } from "@/components/home/floating-reviews";
 import { InstagramPreview } from "@/components/home/instagram-preview";
 import { ButtonLink } from "@/components/ui/button-link";
-import { SectionHeading } from "@/components/ui/section-heading";
+
 import { ServiceCard } from "@/components/ui/service-card";
-import { galleryImages, services, studioConfig } from "@/config/studio.config";
+import { services, studioConfig } from "@/config/studio.config";
+import { AboutStudio } from "@/components/home/about-studio";
 
 
 export default function Home() {
@@ -16,7 +17,11 @@ export default function Home() {
   return (
     <>
       <HeroCarousel />
-      <section className="mx-auto max-w-7xl px-5 pb-16 pt-6 sm:px-8 sm:pb-20 lg:pb-24">
+
+       {/* About Studio - Wedding & Event Cards */}
+      <AboutStudio />
+
+      {/* <section className="mx-auto max-w-7xl px-5 pb-16 pt-6 sm:px-8 sm:pb-20 lg:pb-24">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
           <SectionHeading
             eyebrow={content.featuredGallery.eyebrow}
@@ -34,7 +39,7 @@ export default function Home() {
             { ...galleryImages[2], image: "/mrge_pic/img3.jpg" },
           ]}
         />
-      </section>
+      </section> */}
 
       <DroneShowBanner />
 
@@ -75,7 +80,7 @@ export default function Home() {
           <h2 className="mx-auto mt-3 max-w-2xl font-serif text-4xl leading-tight sm:text-5xl">
             {content.closing.title}
           </h2>
-          <ButtonLink href="/booking" variant="dark" className="mt-7">
+          <ButtonLink href="/contact" variant="dark" className="mt-7">
             {content.closing.linkLabel}
           </ButtonLink>
         </div>

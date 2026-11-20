@@ -14,14 +14,17 @@ import * as THREE from "three";
 import { useRouter } from "next/navigation";
 
 import { albumPricing } from "@/config/studio.config";
-import { getAlbumProject } from "@/lib/album-storage";
+import { albumSizes, getAlbumSizeOption } from "@/config/album.config";
+import { getAlbumProject, saveAlbumProject } from "@/lib/album-storage";
 import { getAlbumPhoto } from "@/lib/album-photo-storage";
 import {
   renderAlbumPageToCanvas,
+  computePageLayoutSlots,
   type PhotoSourceMap,
 } from "@/lib/album-page-canvas";
+import { calculateSmartCrop } from "@/lib/ai/smart-crop-engine";
 import { exportAlbumToPdf, isAlbumExporting } from "@/lib/album-pdf-export";
-import type { AlbumPage, AlbumProject } from "@/types/album";
+import type { AlbumCoverFinish, AlbumPage, AlbumProject } from "@/types/album";
 import { ClosedBookModel } from "./3d/ClosedBookModel";
 import {
   createEmbossedCoverTexture,
@@ -29,6 +32,10 @@ import {
 } from "./3d/BookCoverTitle";
 import {
   type BookViewState,
+  type BookPhysicalDimensions,
+  computeBookDimensions,
+  getTotalSpreads,
+  getSpreadPageIndices,
   COVER_ANIMATION_DURATION_SECONDS,
   interpolateCameraPose,
   interpolateBookTransform,
@@ -53,93 +60,8 @@ import {
   SCROLL_SETTLE_LAMBDA,
 } from "./3d/PageTurnInteraction";
 
-export type { BookViewState };
-
-// --------------------------------------------------------------------------
-// Physical Proportions & Constants
-// --------------------------------------------------------------------------
-
-export interface BookPhysicalDimensions {
-  pageWidth: number;
-  pageHeight: number;
-  spreadWidth: number;
-  aspectRatio: number;
-  boardThickness: number;
-  overhangX: number;
-  overhangY: number;
-  stackDepth: number;
-  spineWidth: number;
-  cameraDistance: number;
-}
-
-/**
- * Computes physically proportional 3D dimensions for the photobook.
- * Scale: 0.25 Three.js units per inch.
- */
-export function computeBookDimensions(
-  sizeId: string,
-  pageCount: number,
-): BookPhysicalDimensions {
-  const sizeConfig = albumPricing.sizes.find((s) => s.id === sizeId) ?? {
-    id: "classic",
-    label: "8 × 12 inches",
-    width: 8,
-    height: 12,
-    amount: 300,
-  };
-
-  const scalePerInch = 0.25;
-  const pageWidth = sizeConfig.width * scalePerInch;
-  const pageHeight = sizeConfig.height * scalePerInch;
-  const spreadWidth = pageWidth * 2;
-  const aspectRatio = sizeConfig.width / sizeConfig.height;
-
-  // Proportional hardcover thickness and square overhang
-  const boardThickness = 0.035;
-  const overhangX = 0.05 * (pageWidth / 2.0);
-  const overhangY = 0.06 * (pageHeight / 3.0);
-
-  // Stack depth increases naturally with page count (20 to 60 pages)
-  const clampedPages = Math.max(20, Math.min(60, pageCount));
-  const stackDepth = 0.03 + (clampedPages - 20) * 0.0015;
-  const spineWidth = stackDepth * 1.6 + 0.08;
-
-  // Camera framing distance
-  const maxDim = Math.max(spreadWidth, pageHeight);
-  const cameraDistance = maxDim * 1.48;
-
-  return {
-    pageWidth,
-    pageHeight,
-    spreadWidth,
-    aspectRatio,
-    boardThickness,
-    overhangX,
-    overhangY,
-    stackDepth,
-    spineWidth,
-    cameraDistance,
-  };
-}
-
-/**
- * Computes total number of two-page spreads in an album.
- */
-export function getTotalSpreads(pageCount: number): number {
-  return Math.max(1, Math.ceil(pageCount / 2));
-}
-
-/**
- * Returns the left and right page indices for a given spread index (0-based).
- */
-export function getSpreadPageIndices(
-  spreadIndex: number,
-  totalPages: number,
-): { leftIndex: number; rightIndex: number } {
-  const leftIndex = spreadIndex * 2;
-  const rightIndex = leftIndex + 1 < totalPages ? leftIndex + 1 : -1;
-  return { leftIndex, rightIndex };
-}
+export type { BookViewState, BookPhysicalDimensions };
+export { computeBookDimensions, getTotalSpreads, getSpreadPageIndices };
 
 let sharedAngleCache: Float32Array | null = null;
 
@@ -940,12 +862,22 @@ function BookScene({
         orbitRef.current.target.set(camLookAt[0], camLookAt[1], camLookAt[2]);
         orbitRef.current.update();
       }
-    } else if (viewState === "closed" && !orbitRef.current?.state && orbitRef.current?.target) {
-      // Keep target centered on closed book when at rest
-      orbitRef.current.target.set(0, -0.05, 0);
-    } else if (viewState === "opened" && !orbitRef.current?.state && orbitRef.current?.target) {
-      // Keep target centered on open spread when at rest
-      orbitRef.current.target.set(0, 0, 0);
+    } else if (viewState === "closed") {
+      // In closed resting state, camera and target center on closed book
+      if (orbitRef.current && !orbitRef.current.state) {
+        orbitRef.current.target.set(-0.05, 0, 0);
+      }
+    } else if (viewState === "opened") {
+      // In opened spread state, camera target is exact center of spread (x=0, y=0, z=0)
+      if (orbitRef.current && !orbitRef.current.state) {
+        orbitRef.current.target.set(0, 0, 0);
+        // Smoothly adapt camera to size switcher changes when at rest
+        const targetPos = new THREE.Vector3(0, dim.cameraDistance * 0.48, dim.cameraDistance * 0.88);
+        if (state.camera.position.distanceTo(targetPos) > 0.05) {
+          state.camera.position.lerp(targetPos, Math.min(1.0, delta * 6));
+          state.camera.lookAt(0, 0, 0);
+        }
+      }
     }
 
     // Book group position & rotation interpolation
@@ -1008,9 +940,9 @@ function BookScene({
       {/* ------------------------------------------------------------------ */}
       {/* Contact Shadows & Ground Receiver Plane                            */}
       {/* ------------------------------------------------------------------ */}
-      {/* Soft Ambient Contact Shadow beneath the Album */}
+      {/* Soft Ambient Contact Shadow beneath the Album on the table plane   */}
       <ContactShadows
-        position={[0, -dim.pageHeight * 0.52, -0.15]}
+        position={[0, -dim.pageHeight * 0.28, 0]}
         opacity={0.52}
         scale={dim.spreadWidth * 2.2}
         blur={2.4}
@@ -1019,10 +951,14 @@ function BookScene({
         color="#292522"
       />
 
-      {/* Shadow Receiver Floor for Directional Key Light Shadows */}
-      <mesh position={[0, 0, -dim.stackDepth - 0.45]} receiveShadow>
-        <planeGeometry args={[24, 24]} />
-        <shadowMaterial opacity={0.16} />
+      {/* Shadow Receiver Horizontal Table Floor for Directional Key Light Shadows */}
+      <mesh
+        position={[0, -dim.pageHeight * 0.28 - 0.005, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        receiveShadow
+      >
+        <planeGeometry args={[30, 30]} />
+        <shadowMaterial opacity={0.14} />
       </mesh>
 
       <group ref={bookGroupRef}>
@@ -1068,10 +1004,10 @@ function BookScene({
         enabled={(viewState === "closed" || viewState === "opened") && !isDraggingPage}
         enableZoom={true}
         enablePan={false}
-        minDistance={dim.cameraDistance * 0.65}
-        maxDistance={dim.cameraDistance * 1.8}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.1}
+        minDistance={dim.cameraDistance * 0.55}
+        maxDistance={dim.cameraDistance * 1.55}
+        minPolarAngle={Math.PI / 9}
+        maxPolarAngle={Math.PI / 2.05}
       />
     </>
   );
@@ -1361,11 +1297,28 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
         const canvasW = 1200;
         const canvasH = Math.round(1200 / dim.aspectRatio);
 
+        // Detect seamless double-page full-bleed spread across adjacent pages
+        const isLeftPage = pageIdx % 2 === 0;
+        const facingIdx = isLeftPage ? pageIdx + 1 : pageIdx - 1;
+        const facingPage = project.pages[facingIdx];
+        const isFullBleedSpread =
+          page.layout === "full-bleed" &&
+          facingPage?.layout === "full-bleed" &&
+          page.photos[0]?.photoId &&
+          page.photos[0]?.photoId === facingPage.photos[0]?.photoId;
+
+        const spreadRole = isFullBleedSpread
+          ? isLeftPage
+            ? "left"
+            : "right"
+          : "single";
+
         const canvas = await renderAlbumPageToCanvas(page, {
           width: canvasW,
           height: canvasH,
           projectId: project.id,
           photoSources,
+          spreadRole,
         });
 
         const texture = new THREE.CanvasTexture(canvas);
@@ -1498,6 +1451,101 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
     setSpreadIndex(0);
     setViewState("closed");
   }, []);
+
+  // Size selection handler: updates physical geometry and clears textures to adapt aspect ratio
+  const handleSizeChange = useCallback(
+    (newSizeId: string) => {
+      if (!project || project.sizeId === newSizeId) return;
+      const sizeOpt = getAlbumSizeOption(newSizeId);
+
+      // Invalidate texture cache so pages re-render with the new aspect ratio
+      const cache = textureCacheRef.current;
+      cache.forEach((tex) => tex.dispose());
+      cache.clear();
+      setTextures(new Map());
+
+      // Recompute smart crops for existing pages in the new album format
+      const targetAspect = sizeOpt.width / sizeOpt.height;
+      const pageW = targetAspect >= 1 ? 1200 : Math.round(1800 * targetAspect);
+      const pageH = Math.round(pageW / targetAspect);
+
+      const updatedPages = project.pages.map((page) => {
+        const slots = computePageLayoutSlots(
+          page.layout,
+          page.photos.length,
+          pageW,
+          pageH,
+          page.photoSpacing ?? "balanced",
+        );
+
+        const updatedPhotos = page.photos.map((placement, idx) => {
+          const photoMeta = project.photos.find((p) => p.id === placement.photoId);
+          if (photoMeta?.smartFit) {
+            const slot = slots[idx] ?? { index: idx, x: 0, y: 0, width: pageW, height: pageH };
+            const smartResult = calculateSmartCrop(
+              photoMeta.width,
+              photoMeta.height,
+              slot.width,
+              slot.height,
+              photoMeta.smartFit.subjects,
+            );
+            return {
+              ...placement,
+              transform: {
+                ...placement.transform,
+                cropX: smartResult.cropX,
+                cropY: smartResult.cropY,
+                fitMode: smartResult.fitMode,
+              },
+            };
+          }
+          return placement;
+        });
+
+        return {
+          ...page,
+          photos: updatedPhotos,
+        };
+      });
+
+      const updated: AlbumProject = {
+        ...project,
+        sizeId: newSizeId,
+        orientation: sizeOpt.orientation,
+        pages: updatedPages,
+        updatedAt: Date.now(),
+      };
+      saveAlbumProject(updated);
+      setProject(updated);
+    },
+    [project],
+  );
+
+  // Cover finish selection handler: updates material and cover textures
+  const handleFinishChange = useCallback(
+    (newFinish: AlbumCoverFinish) => {
+      if (!project || project.coverFinish === newFinish) return;
+      const updated: AlbumProject = {
+        ...project,
+        coverFinish: newFinish,
+        updatedAt: Date.now(),
+      };
+      saveAlbumProject(updated);
+      setProject(updated);
+    },
+    [project],
+  );
+
+  // Direct spread jump handler
+  const handleJumpToSpread = useCallback(
+    (targetSpread: number) => {
+      if (viewState !== "opened" || flipState || isPreparingSpread) return;
+      if (targetSpread < 0 || targetSpread >= totalSpreads) return;
+      registerUserInteraction();
+      setSpreadIndex(targetSpread);
+    },
+    [viewState, flipState, isPreparingSpread, totalSpreads, registerUserInteraction],
+  );
 
   // Turn page action with pre-loading verification
   const turnSpread = useCallback(
@@ -2160,12 +2208,12 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
       }`}
     >
       {/* Header bar */}
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#B99B70]/25 bg-white/70 px-5 py-4 backdrop-blur-md sm:px-8">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#B99B70]/20 bg-[#FAF7F2]/80 px-5 py-3.5 backdrop-blur-md sm:px-8">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#B99B70]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8C6D3F]">
             StudioFrame 3D Photobook
           </p>
-          <h1 className="mt-1 font-serif text-xl text-[#292522]">
+          <h1 className="font-serif text-lg text-[#292522] sm:text-xl">
             {project.name || "Custom Album"}
           </h1>
         </div>
@@ -2183,7 +2231,7 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
             type="button"
             onClick={handleDownloadPdf}
             disabled={isExportingPdf || !!flipState}
-            className="flex items-center gap-2 rounded-full border border-[#B99B70] bg-white px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:bg-[#B99B70] hover:text-[#171717] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-full border border-[#B99B70]/40 bg-white/90 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2] disabled:opacity-50"
           >
             {isExportingPdf ? (
               <>
@@ -2192,7 +2240,11 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
               </>
             ) : (
               <>
-                <span>📥</span>
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 <span>Download PDF</span>
               </>
             )}
@@ -2201,7 +2253,7 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
           <button
             type="button"
             onClick={toggleFullscreen}
-            className="rounded-full border border-[#292522]/20 bg-white/80 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70]"
+            className="rounded-full border border-[#B99B70]/30 bg-white/90 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2]"
           >
             {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
           </button>
@@ -2209,12 +2261,90 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
           <button
             type="button"
             onClick={() => router.push(`/albums/editor/${projectId}`)}
-            className="rounded-full bg-[#B99B70] px-5 py-2 text-xs font-semibold text-[#171717] shadow-sm transition hover:bg-[#D0B48A]"
+            className="rounded-full bg-[#D5B991] px-5 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:bg-[#C2A781]"
           >
             Back to editor
           </button>
         </div>
       </header>
+
+      {/* Interactive Customization Bar: Physical Sizes & Cover Finishes */}
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-3 pt-3 sm:px-6">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-full border border-[#B99B70]/30 bg-[#FAF7F2]/95 px-5 py-2 shadow-sm backdrop-blur-md">
+          {/* Size Switcher with real-time preview update */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#292522]">
+              Album Size:
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {albumSizes.map((size) => {
+                const isSelected = project.sizeId === size.id;
+                const orientationLabel =
+                  size.orientation === "square"
+                    ? "Square"
+                    : size.orientation === "landscape"
+                      ? "Landscape"
+                      : "Portrait";
+                return (
+                  <button
+                    key={size.id}
+                    type="button"
+                    onClick={() => handleSizeChange(size.id)}
+                    className={`rounded-full px-3 py-1 text-xs transition ${
+                      isSelected
+                        ? "bg-[#D5B991] font-semibold text-[#292522] shadow-sm ring-1 ring-[#8C6D3F]/30"
+                        : "border border-[#B99B70]/30 bg-white/80 font-medium text-[#5C5248] hover:border-[#B99B70] hover:text-[#171717]"
+                    }`}
+                    title={`${size.label} · ${size.description}`}
+                  >
+                    <span>{size.label.replace("×", "x")}</span>
+                    <span className="ml-1 text-[10px] opacity-75">
+                      {orientationLabel}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <span className="hidden text-[#B99B70]/40 sm:inline" aria-hidden="true">
+            |
+          </span>
+
+          {/* Cover Finish Switcher */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#292522]">
+              Finish:
+            </span>
+            <div className="flex items-center gap-1.5">
+              {(["linen", "leather", "photo"] as const).map((finish) => {
+                const isSelected = project.coverFinish === finish;
+                const finishLabel =
+                  finish === "linen"
+                    ? "Linen"
+                    : finish === "leather"
+                      ? "Leather"
+                      : "Photo Cover";
+                return (
+                  <button
+                    key={finish}
+                    type="button"
+                    onClick={() => handleFinishChange(finish)}
+                    className={`rounded-full px-3 py-1 text-xs transition ${
+                      isSelected
+                        ? "bg-[#D5B991] font-semibold text-[#292522] shadow-sm ring-1 ring-[#8C6D3F]/30"
+                        : "border border-[#B99B70]/30 bg-white/80 font-medium text-[#5C5248] hover:border-[#B99B70] hover:text-[#171717]"
+                    }`}
+                  >
+                    {finishLabel}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* PDF Export Notification Overlay */}
       {isExportingPdf && (
@@ -2265,9 +2395,21 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
               disabled={!hasPrevious || !!flipState || isPreparingSpread}
               title="Turn to previous spread"
               aria-label="Previous spread"
-              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-lg font-bold text-[#292522] border border-[#B99B70]/30 shadow-md backdrop-blur-md transition hover:bg-[#B99B70] hover:text-[#171717] disabled:pointer-events-none disabled:opacity-0"
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF7F2]/90 text-sm font-semibold text-[#292522] border border-[#B99B70]/35 shadow-md backdrop-blur-md transition hover:bg-[#D5B991] hover:text-[#171717] hover:border-[#B99B70] disabled:pointer-events-none disabled:opacity-0"
             >
-              ◀
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
             </button>
           )}
 
@@ -2279,9 +2421,21 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
               disabled={!hasNext || !!flipState || isPreparingSpread}
               title="Turn to next spread"
               aria-label="Next spread"
-              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/80 text-lg font-bold text-[#292522] border border-[#B99B70]/30 shadow-md backdrop-blur-md transition hover:bg-[#B99B70] hover:text-[#171717] disabled:pointer-events-none disabled:opacity-0"
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-[#FAF7F2]/90 text-sm font-semibold text-[#292522] border border-[#B99B70]/35 shadow-md backdrop-blur-md transition hover:bg-[#D5B991] hover:text-[#171717] hover:border-[#B99B70] disabled:pointer-events-none disabled:opacity-0"
             >
-              ▶
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </button>
           )}
 
@@ -2320,8 +2474,8 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
           <Canvas
             shadows={{ type: THREE.PCFSoftShadowMap }}
             camera={{
-              position: [0.15, -dim.pageHeight * 0.12, dim.cameraDistance * 0.95],
-              fov: 38,
+              position: [0, dim.cameraDistance * 0.48, dim.cameraDistance * 0.88],
+              fov: 30,
             }}
             dpr={[1, 2]}
             gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
@@ -2363,7 +2517,7 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
                 Physical Hardcover · Closed View
               </span>
               <span className="text-xs text-[#5C5248]/75">
-                {project.name || "Custom Album"} · {dim.pageWidth * 4} × {dim.pageHeight * 4}&quot; ({project.coverFinish.toUpperCase()})
+                {project.name || "Custom Album"} · {getAlbumSizeOption(project.sizeId).label} ({getAlbumSizeOption(project.sizeId).tagline}) · {project.coverFinish.toUpperCase()}
               </span>
             </div>
 
@@ -2411,117 +2565,164 @@ export function Album3DBook({ projectId }: Album3DBookProps) {
             </button>
           </div>
         ) : (
-          <div className="mt-4 flex w-full max-w-3xl flex-wrap items-center justify-between gap-3 px-4">
-            {/* Previous / First Controls + Close Album button */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={handleStartClose}
-                disabled={!!flipState || isPreparingSpread}
-                title="Close album with cinematic hinge animation"
-                aria-label="Close album"
-                className="rounded-full border border-[#292522]/20 bg-white/90 px-3.5 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:text-[#8C6D3F] disabled:opacity-25"
-              >
-                📕 Close
-              </button>
-              <button
-                type="button"
-                onClick={() => !flipState && !isPreparingSpread && setSpreadIndex(0)}
-                disabled={!hasPrevious || !!flipState || isPreparingSpread}
-                title="First spread"
-                aria-label="First spread"
-                className="rounded-full border border-[#292522]/20 bg-white/90 px-3 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] disabled:opacity-25"
-              >
-                ⏮
-              </button>
-              <button
-                type="button"
-                onClick={() => void turnSpread("previous", true)}
-                disabled={!hasPrevious || !!flipState || isPreparingSpread}
-                className="rounded-full border border-[#292522]/20 bg-white/90 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] disabled:opacity-25 sm:px-5 sm:py-2.5 sm:text-sm"
-              >
-                ◀ Previous
-              </button>
-            </div>
-
-            {/* Autoplay Play/Pause & Spread Position */}
-            <div className="flex flex-col items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (isAutoplayPlaying) {
-                    setIsAutoplayPlaying(false);
-                    setIsAutoplayPausedByUser(false);
-                    if (resumeAutoplayTimerRef.current) {
-                      clearTimeout(resumeAutoplayTimerRef.current);
-                      resumeAutoplayTimerRef.current = null;
-                    }
-                  } else {
-                    setIsAutoplayPlaying(true);
-                    setIsAutoplayPausedByUser(false);
-                  }
-                }}
-                disabled={!!flipState || isPreparingSpread}
-                aria-label={isAutoplayPlaying ? "Pause automatic page turning" : "Play automatic page turning"}
-                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold shadow-sm transition ${
-                  isAutoplayPlaying
-                    ? "bg-[#B99B70] text-[#171717] ring-2 ring-[#B99B70]/40"
-                    : "border border-[#292522]/20 bg-white/90 text-[#292522] hover:border-[#B99B70]"
-                }`}
-              >
-                <span>{isAutoplayPlaying ? (isAutoplayPausedByUser ? "⏳" : "⏸") : "▶"}</span>
-                <span>
-                  {isAutoplayPlaying
-                    ? isAutoplayPausedByUser
-                      ? "Auto (paused)"
-                      : "Pause Auto"
-                    : "Autoplay"}
-                </span>
-              </button>
-
-              <div className="text-center">
-                <p className="text-xs font-medium tracking-wider text-[#8C6D3F]">
-                  Spread {spreadIndex + 1} of {totalSpreads}
-                </p>
-                <p className="text-[11px] text-[#5C5248]/75">
-                  {leftPageLabel}
-                  {rightPageLabel ? ` · ${rightPageLabel}` : ""}
-                </p>
+          <div className="mt-4 flex w-full max-w-4xl flex-col items-center gap-3 px-4">
+            {/* Direct Spread Jump Scrubber */}
+            <div className="flex w-full max-w-3xl flex-wrap items-center justify-center gap-3 rounded-full border border-[#B99B70]/30 bg-[#FAF7F2]/90 px-6 py-2 shadow-sm backdrop-blur-md">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#292522]">
+                JUMP TO SPREAD:
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                {Array.from({ length: totalSpreads }, (_, idx) => {
+                  const isCurrent = idx === spreadIndex;
+                  const { leftIndex: lIdx, rightIndex: rIdx } = getSpreadPageIndices(idx, totalPages);
+                  const tip = rIdx >= 0 ? `Spread ${idx + 1} (Pages ${lIdx + 1} & ${rIdx + 1})` : `Spread ${idx + 1} (Page ${lIdx + 1})`;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleJumpToSpread(idx)}
+                      disabled={!!flipState || isPreparingSpread}
+                      title={tip}
+                      aria-label={tip}
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition ${
+                        isCurrent
+                          ? "bg-[#D5B991] font-bold text-[#292522] shadow-sm ring-1 ring-[#8C6D3F]/30"
+                          : "font-medium text-[#5C5248] hover:bg-[#B99B70]/20 hover:text-[#171717]"
+                      } disabled:opacity-30`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
               </div>
+              <div className="hidden h-px w-20 bg-[#B99B70]/30 sm:block" aria-hidden="true" />
             </div>
 
-            {/* Next / Last Controls */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => void turnSpread("next", true)}
-                disabled={!hasNext || !!flipState || isPreparingSpread}
-                className="rounded-full bg-[#B99B70] px-4 py-2 text-xs font-semibold text-[#171717] shadow-md transition hover:bg-[#D0B48A] disabled:opacity-25 sm:px-5 sm:py-2.5 sm:text-sm"
-              >
-                Next ▶
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  !flipState && !isPreparingSpread && setSpreadIndex(totalSpreads - 1)
-                }
-                disabled={!hasNext || !!flipState || isPreparingSpread}
-                title="Last spread"
-                aria-label="Last spread"
-                className="rounded-full border border-[#292522]/20 bg-white/90 px-3 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] disabled:opacity-25"
-              >
-                ⏭
-              </button>
+            {/* Bottom 3-Group Control Bar */}
+            <div className="flex w-full max-w-3xl flex-wrap items-center justify-between gap-3 pt-1">
+              {/* Left Group: Close, First, Previous */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleStartClose}
+                  disabled={!!flipState || isPreparingSpread}
+                  title="Close album with cinematic hinge animation"
+                  aria-label="Close album"
+                  className="flex items-center gap-1.5 rounded-full border border-[#B99B70]/35 bg-white/90 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2] disabled:opacity-30"
+                >
+                  <span className="inline-block h-2.5 w-2.5 rounded-[2px] bg-[#E05A47]" aria-hidden="true" />
+                  <span>Close</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => !flipState && !isPreparingSpread && setSpreadIndex(0)}
+                  disabled={!hasPrevious || !!flipState || isPreparingSpread}
+                  title="First spread"
+                  aria-label="First spread"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#B99B70]/35 bg-white/90 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2] disabled:opacity-30"
+                >
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="19 20 9 12 19 4 19 20" />
+                    <line x1="5" y1="19" x2="5" y2="5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void turnSpread("previous", true)}
+                  disabled={!hasPrevious || !!flipState || isPreparingSpread}
+                  className="flex items-center gap-1.5 rounded-full border border-[#B99B70]/35 bg-white/90 px-4 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2] disabled:opacity-30"
+                >
+                  <span>◄</span>
+                  <span>Previous</span>
+                </button>
+              </div>
+
+              {/* Center Group: Autoplay & Spread / Page Status */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isAutoplayPlaying) {
+                      setIsAutoplayPlaying(false);
+                      setIsAutoplayPausedByUser(false);
+                      if (resumeAutoplayTimerRef.current) {
+                        clearTimeout(resumeAutoplayTimerRef.current);
+                        resumeAutoplayTimerRef.current = null;
+                      }
+                    } else {
+                      setIsAutoplayPlaying(true);
+                      setIsAutoplayPausedByUser(false);
+                    }
+                  }}
+                  disabled={!!flipState || isPreparingSpread}
+                  aria-label={isAutoplayPlaying ? "Pause automatic page turning" : "Play automatic page turning"}
+                  className={`flex items-center gap-1.5 rounded-full px-5 py-1.5 text-xs font-semibold shadow-sm transition ${
+                    isAutoplayPlaying
+                      ? "bg-[#D5B991] text-[#292522] ring-1 ring-[#8C6D3F]/30"
+                      : "border border-[#B99B70]/35 bg-white/90 text-[#292522] hover:border-[#B99B70] hover:bg-[#FAF7F2]"
+                  }`}
+                >
+                  <span>{isAutoplayPlaying ? (isAutoplayPausedByUser ? "⏳" : "⏸") : "►"}</span>
+                  <span>
+                    {isAutoplayPlaying
+                      ? isAutoplayPausedByUser
+                        ? "Auto (paused)"
+                        : "Pause Auto"
+                      : "Autoplay"}
+                  </span>
+                </button>
+
+                <div className="text-center">
+                  <p className="text-xs font-medium text-[#292522]">
+                    Spread {spreadIndex + 1} of {totalSpreads}
+                  </p>
+                  <p className="text-[11px] text-[#5C5248]/75">
+                    {leftPageLabel}
+                    {rightPageLabel ? ` - ${rightPageLabel}` : ""}
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Group: Next & Last */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void turnSpread("next", true)}
+                  disabled={!hasNext || !!flipState || isPreparingSpread}
+                  className="flex items-center gap-1.5 rounded-full bg-[#D5B991] px-5 py-2 text-xs font-semibold text-[#292522] shadow-sm transition hover:bg-[#C2A781] disabled:opacity-30"
+                >
+                  <span>Next</span>
+                  <span>►</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    !flipState && !isPreparingSpread && setSpreadIndex(totalSpreads - 1)
+                  }
+                  disabled={!hasNext || !!flipState || isPreparingSpread}
+                  title="Last spread"
+                  aria-label="Last spread"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#B99B70]/35 bg-white/90 text-xs font-semibold text-[#292522] shadow-sm transition hover:border-[#B99B70] hover:bg-[#FAF7F2] disabled:opacity-30"
+                >
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="5 4 15 12 5 20 5 4" />
+                    <line x1="19" y1="5" x2="19" y2="19" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        <p className="mt-3 text-center text-[11px] text-[#5C5248]/60">
-          {viewState === "closed"
-            ? "Click the cover or 'Open Album' to view inner spreads. Rotate with mouse to inspect physical hardcover."
-            : viewState === "opening" || viewState === "closing"
-              ? "Smooth cinematic hardcover animation in progress..."
-              : "Click the left page to turn back, or the right page to turn forward. You can also scroll, drag page corners, or press Space for autoplay. Use 'Close Album' or Escape to close."}
+        <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-[11px] text-[#5C5248]/70">
+          <span className="text-xs">ⓘ</span>
+          <span>
+            {viewState === "closed"
+              ? "Click the cover or 'Open Album' to view inner spreads. Rotate with mouse to inspect physical hardcover."
+              : viewState === "opening" || viewState === "closing"
+                ? "Smooth cinematic hardcover animation in progress..."
+                : "Click on the page to turn back, or the right page to turn forward. You can also scroll, drag page corners, or press Space for autoplay. Use Close Album or Escape to close."}
+          </span>
         </p>
       </section>
     </main>

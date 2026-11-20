@@ -33,8 +33,8 @@ export function FilmBannerCarousel({
       aria-roledescription="carousel"
       className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8"
     >
-      <div className="isolate overflow-hidden rounded-2xl bg-[var(--color-ink)] text-white shadow-xl shadow-black/15 ring-1 ring-black/10 sm:rounded-3xl">
-        <div className="relative isolate min-h-[440px] overflow-hidden sm:min-h-[480px] lg:min-h-[520px]">
+      <div className="isolate flex h-[260px] flex-col overflow-hidden rounded-2xl bg-[var(--color-ink)] text-white shadow-xl shadow-black/15 ring-1 ring-black/10 sm:h-[360px] sm:rounded-3xl lg:h-[440px]">
+        <div className="relative isolate min-h-0 flex-1 overflow-hidden">
           {banners.map((banner, index) => {
             const active = index === activeIndex;
             const playing = active && playingId === banner.id;
@@ -61,29 +61,29 @@ export function FilmBannerCarousel({
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-black/10" />
 
-                <div className="relative mx-auto flex h-full min-h-[440px] max-w-7xl flex-col justify-center px-5 pb-12 pt-12 sm:min-h-[480px] sm:px-8 lg:min-h-[520px]">
+                <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-center px-5 py-3 sm:px-8 sm:py-6">
                   <div className="max-w-3xl">
-                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/75">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/75 sm:text-xs">
                       {banner.eyebrow}
                     </p>
                     {index === 0 ? (
-                      <h1 className="mt-5 whitespace-pre-line font-serif text-4xl leading-[1] tracking-tight sm:text-5xl lg:text-6xl">
+                      <h1 className="mt-2 whitespace-pre-line font-serif text-2xl leading-[1] tracking-tight sm:mt-4 sm:text-4xl lg:text-5xl">
                         {banner.title}
                       </h1>
                     ) : (
-                      <p className="mt-5 whitespace-pre-line font-serif text-4xl leading-[1] tracking-tight sm:text-5xl lg:text-6xl">
+                      <p className="mt-2 whitespace-pre-line font-serif text-2xl leading-[1] tracking-tight sm:mt-4 sm:text-4xl lg:text-5xl">
                         {banner.title}
                       </p>
                     )}
-                    <p className="mt-6 max-w-lg text-base leading-7 text-white/80 sm:text-lg">
+                    <p className="mt-2 max-w-lg text-xs leading-5 text-white/80 sm:mt-4 sm:text-base sm:leading-7 lg:text-lg">
                       {banner.description}
                     </p>
-                    <div className="mt-8 flex flex-wrap gap-3">
+                    <div className="mt-3 flex flex-wrap gap-3 sm:mt-6">
                       <button
                         type="button"
                         onClick={() => setPlayingId(banner.id)}
                         aria-label={`Play video: ${banner.tabLabel}`}
-                        className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--studio-champagne-gold)] px-6 text-sm font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)]"
+                        className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[var(--studio-champagne-gold)] px-5 text-sm sm:min-h-12 sm:px-6 font-semibold text-[var(--studio-midnight-black)] transition-colors hover:bg-[var(--studio-warm-beige)]"
                       >
                         <svg
                           aria-hidden="true"
@@ -133,8 +133,8 @@ export function FilmBannerCarousel({
             );
           })}
         </div>
-        <div className="border-t border-white/10">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 sm:pr-24">
+        <div className="shrink-0 border-t border-white/10">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-1.5 sm:px-8 sm:py-3 sm:pr-24">
             <ul
               aria-label="Choose a banner"
               className="flex min-w-0 gap-2 overflow-x-auto py-1"
@@ -147,7 +147,7 @@ export function FilmBannerCarousel({
                       type="button"
                       onClick={() => showBanner(index)}
                       aria-current={active ? "true" : undefined}
-                      className={`min-h-11 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
+                      className={`min-h-9 rounded-full border px-4 sm:min-h-11 text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
                         active
                           ? "border-[var(--studio-champagne-gold)] bg-[var(--studio-champagne-gold)] text-[var(--studio-midnight-black)]"
                           : "border-white/40 bg-black/30 text-white/85 hover:border-[var(--studio-champagne-gold)] hover:text-white"
@@ -170,7 +170,7 @@ export function FilmBannerCarousel({
                 type="button"
                 onClick={() => showBanner(activeIndex - 1)}
                 aria-label="Previous banner"
-                className="h-11 w-11 rounded-full border border-[var(--studio-champagne-gold)] bg-black/30 text-lg transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
+                className="h-9 w-9 rounded-full border border-[var(--studio-champagne-gold)] bg-black/30 text-lg sm:h-11 sm:w-11 transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
               >
                 ←
               </button>
@@ -178,7 +178,7 @@ export function FilmBannerCarousel({
                 type="button"
                 onClick={() => showBanner(activeIndex + 1)}
                 aria-label="Next banner"
-                className="h-11 w-11 rounded-full border border-[var(--studio-champagne-gold)] bg-black/30 text-lg transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
+                className="h-9 w-9 rounded-full border border-[var(--studio-champagne-gold)] bg-black/30 text-lg sm:h-11 sm:w-11 transition-colors hover:bg-[var(--studio-champagne-gold)] hover:text-[var(--studio-midnight-black)]"
               >
                 →
               </button>

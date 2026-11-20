@@ -30,12 +30,11 @@ const galleryData: GalleryItem[] = [
   { id: 3, title: "Traditional Haldi Celebration", category: "Haldi", image: image("photo-1771992223384-96d5914e99f9") },
   { id: 4, title: "Bridal Mehendi", category: "Mehendi", image: image("photo-1613823738441-ac32be690327") },
   { id: 5, title: "South Indian Wedding Reception", category: "Reception", image: image("photo-1630663124437-382b3831e7d8") },
-  { id: 6, title: "Indian Woman Portrait", category: "Portrait", image: image("photo-1772544797306-42ffcda5c63b") },
   { id: 7, title: "Motherhood Portrait", category: "Maternity", image: image("photo-1774437891904-3c642f45d05d") },
   { id: 8, title: "Traditional Family Celebration", category: "Baby Shower", image: image("photo-1524069290683-0457abfe42c3") },
   { id: 9, title: "Newborn Photography", category: "Newborn", image: image("photo-1511895426328-dc8714191300") },
   { id: 10, title: "Children Photography", category: "Kids & Birthday", image: image("photo-1503454537195-1dcabb73ffb9") },
-  { id: 11, title: "Family Portrait", category: "Family", image: image("photo-1511895426328-dc8714191300") },
+  { id: 11, title: "Family Portrait", category: "Family", image: image("photo-1511632765486-a01980e01a18") },
   { id: 12, title: "Tamil Nadu Cultural Celebration", category: "Events", image: image("photo-1688820661462-a44e4b2770e8") },
   { id: 13, title: "Indian Traditional Fashion", category: "Fashion", image: image("photo-1624214390234-2849d6a888c0") },
   { id: 14, title: "Professional Product Photography", category: "Commercial", image: image("photo-1497366754035-f200968a6e72") },
@@ -99,21 +98,33 @@ export default function StudioZoneDayThemeGallery() {
     [failedImages]
   );
 
+  // UNIQUE IMAGES FOR AUTOMATIC HERO BANNER
+  const heroGalleryItems = useMemo(
+    () =>
+      visibleGalleryItems.filter(
+        (item, index, items) =>
+          items.findIndex((photo) => photo.image === item.image) === index
+      ),
+    [visibleGalleryItems]
+  );
+
   const activeHero =
-    visibleGalleryItems.length > 0
-      ? visibleGalleryItems[heroIndex % visibleGalleryItems.length]
+    heroGalleryItems.length > 0
+      ? heroGalleryItems[heroIndex % heroGalleryItems.length]
       : null;
 
   // AUTOMATIC HERO BANNER
   useEffect(() => {
-    if (visibleGalleryItems.length < 2) return;
+    if (heroGalleryItems.length < 2) return;
 
     const timer = window.setInterval(() => {
-      setHeroIndex((current) => (current + 1) % visibleGalleryItems.length);
+      setHeroIndex(
+        (current) => (current + 1) % heroGalleryItems.length
+      );
     }, 4000);
 
     return () => window.clearInterval(timer);
-  }, [visibleGalleryItems.length]);
+  }, [heroGalleryItems.length]);
 
   const filteredItems = useMemo(
     () =>
@@ -130,7 +141,6 @@ export default function StudioZoneDayThemeGallery() {
     [activeCategory, searchQuery, visibleGalleryItems]
   );
 
-  // TWO IDENTICAL SETS CREATE A SEAMLESS INFINITE FILMSTRIP
   const filmstripItems = [...visibleGalleryItems, ...visibleGalleryItems];
 
   const currentImageIndex = filteredItems.findIndex(
@@ -149,18 +159,18 @@ export default function StudioZoneDayThemeGallery() {
   };
 
   const showPreviousHero = () => {
-    if (!visibleGalleryItems.length) return;
+    if (!heroGalleryItems.length) return;
 
     setHeroIndex((current) =>
-      current === 0 ? visibleGalleryItems.length - 1 : current - 1
+      current === 0 ? heroGalleryItems.length - 1 : current - 1
     );
   };
 
   const showNextHero = () => {
-    if (!visibleGalleryItems.length) return;
+    if (!heroGalleryItems.length) return;
 
     setHeroIndex(
-      (current) => (current + 1) % visibleGalleryItems.length
+      (current) => (current + 1) % heroGalleryItems.length
     );
   };
 
@@ -206,7 +216,6 @@ export default function StudioZoneDayThemeGallery() {
     };
   }, [selectedImage, currentImageIndex, filteredItems]);
 
-  // TAMIL NADU WEDDING COMPARISON PHOTO
   const comparisonImage =
     "https://images.pexels.com/photos/30458553/pexels-photo-30458553.jpeg?auto=compress&cs=tinysrgb&w=1600";
 
@@ -228,22 +237,38 @@ export default function StudioZoneDayThemeGallery() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#FAF8F4] text-[#30251F]">
+
       {/* HERO BANNER */}
-      <section className="relative mx-auto mb-12 mt-8 min-h-[560px] w-[calc(100%-2rem)] max-w-7xl overflow-hidden rounded-3xl border border-[#D8B58C]/50 bg-[#171311] shadow-[0_24px_70px_rgba(23,19,17,0.2)] md:mb-16 md:mt-12 md:min-h-[680px] md:w-[calc(100%-4rem)]">
+      <section className="relative mx-auto mb-12 mt-4 min-h-[340px] w-[calc(100%-2rem)] max-w-7xl overflow-hidden rounded-3xl border border-[#D8B58C]/50 bg-[#171311] shadow-[0_24px_70px_rgba(23,19,17,0.2)] md:mb-12 md:mt-6 md:min-h-[380px] md:w-[calc(100%-4rem)]">
+
         {activeHero && (
-          <img
-            key={activeHero.id}
-            src={activeHero.image}
-            alt={activeHero.title}
-            onError={() => markImageFailed(activeHero.id)}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-all duration-1000 ease-in-out"
-          />
+          <>
+            {/* BLURRED BACKGROUND FILLS THE ENTIRE BANNER */}
+            <img
+              src={activeHero.image}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full scale-110 object-cover object-center blur-2xl opacity-70"
+            />
+
+            {/* MAIN HERO IMAGE */}
+            <img
+              key={activeHero.id}
+              src={activeHero.image}
+              alt={activeHero.title}
+              onError={() => markImageFailed(activeHero.id)}
+              className="absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out"
+              style={{
+                objectPosition: "center 20%",
+              }}
+            />
+          </>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
-        <div className="relative z-10 flex min-h-[560px] flex-col justify-center px-6 py-24 md:min-h-[680px] md:px-20">
+        <div className="relative z-10 flex min-h-[340px] flex-col justify-center px-6 py-8 md:min-h-[380px] md:px-20 md:py-10">
           <div className="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.35em] text-[#E7C69B]">
             <span className="h-px w-10 bg-[#E7C69B]" />
             StudioFrame Photography
@@ -286,7 +311,7 @@ export default function StudioZoneDayThemeGallery() {
           </div>
         </div>
 
-        {visibleGalleryItems.length > 1 && (
+        {heroGalleryItems.length > 1 && (
           <>
             <div className="absolute bottom-8 right-6 z-20 flex items-center gap-3 md:right-20">
               <button
@@ -307,13 +332,13 @@ export default function StudioZoneDayThemeGallery() {
             </div>
 
             <div className="absolute bottom-12 left-6 z-20 flex max-w-[60%] flex-wrap gap-2 md:left-20">
-              {visibleGalleryItems.map((item, index) => (
+              {heroGalleryItems.map((item, index) => (
                 <button
                   key={item.id}
                   onClick={() => setHeroIndex(index)}
                   aria-label={`Show banner image ${index + 1}`}
                   className={`h-1.5 rounded-full transition-all ${
-                    heroIndex % visibleGalleryItems.length === index
+                    heroIndex % heroGalleryItems.length === index
                       ? "w-9 bg-[#E7C69B]"
                       : "w-3 bg-white/60 hover:bg-white"
                   }`}
@@ -343,11 +368,12 @@ export default function StudioZoneDayThemeGallery() {
           </div>
 
           <div className="mx-auto max-w-5xl">
-            <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-[#E9E0D5] shadow-2xl">
+            <div className="relative mx-auto aspect-[13/10] w-full overflow-hidden rounded-2xl bg-[#E9E0D5] shadow-2xl">
               <img
                 src={comparisonImage}
                 alt="Traditional Tamil Nadu wedding in Chennai"
                 className="absolute inset-0 h-full w-full object-cover"
+                style={{ objectPosition: "center center" }}
               />
 
               <div
@@ -361,6 +387,7 @@ export default function StudioZoneDayThemeGallery() {
                   alt="Enhanced Tamil Nadu wedding photograph"
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{
+                    objectPosition: "center center",
                     filter:
                       "brightness(1.16) contrast(1.14) saturate(1.38) sepia(0.08)",
                   }}
@@ -496,7 +523,7 @@ export default function StudioZoneDayThemeGallery() {
             )}
           </div>
 
-          {/* MASONRY GALLERY - NATURAL IMAGE HEIGHT */}
+          {/* MASONRY GALLERY */}
           {filteredItems.length > 0 ? (
             <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
               {filteredItems.map((item) => (
@@ -662,7 +689,6 @@ export default function StudioZoneDayThemeGallery() {
           StudioFrame • Photography Memories • 001 — {visibleGalleryItems.length}
         </div>
 
-        {/* FILMSTRIP ANIMATION */}
         <style jsx>{`
           .camera-filmstrip-viewport {
             -ms-overflow-style: none;
@@ -726,7 +752,6 @@ export default function StudioZoneDayThemeGallery() {
         </div>
       </footer>
 
-      {/* IVORY-WHITE SPACE BELOW FOOTER */}
       <div className="h-12 w-full bg-[#FAF8F4]" />
 
       {/* FULLSCREEN IMAGE VIEWER */}

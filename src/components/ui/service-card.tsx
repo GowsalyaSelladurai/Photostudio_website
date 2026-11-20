@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import Link from "next/link";
 import type { Service } from "@/types/studio";
@@ -69,7 +68,6 @@ export function ServiceCard({
             {service.description}
           </p>
 
-          {/* Show inclusions only on the full Services page */}
           {!isPreview &&
             service.inclusions &&
             service.inclusions.length > 0 && (
@@ -87,7 +85,7 @@ export function ServiceCard({
             )}
         </div>
 
-        {/* Pricing and Enquiry */}
+        {/* Pricing and Booking */}
         <div
           className={`border-t border-[#B89970]/25 ${
             isPreview ? "mt-4 pt-4" : "mt-7 pt-5"
@@ -106,12 +104,12 @@ export function ServiceCard({
           </p>
 
           <Link
-            href="/contact"
+            href="/booking"
             className={`flex w-full items-center justify-center gap-2 rounded-xl border border-[#B89970]/50 bg-[#292522] text-sm font-medium text-[#E8DDCE] transition-all duration-300 hover:border-[#E8C99F] hover:bg-[#B89970] hover:text-[#292522] ${
               isPreview ? "mt-4 px-4 py-2.5" : "mt-5 px-5 py-3"
             }`}
           >
-            Enquire Now
+            Book Now
             <span aria-hidden="true">→</span>
           </Link>
         </div>

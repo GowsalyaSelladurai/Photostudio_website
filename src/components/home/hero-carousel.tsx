@@ -22,8 +22,12 @@ export function HeroCarousel() {
   }
 
   return (
-    <section aria-label="Featured photography" aria-roledescription="carousel" className="px-4 pb-10 pt-6 sm:px-7 sm:pb-12 sm:pt-8 lg:px-10">
-      <div className="relative isolate mx-auto min-h-[480px] max-w-[1200px] overflow-hidden rounded-[1.25rem] border border-[color-mix(in_srgb,var(--studio-champagne-gold)_28%,transparent)] bg-[var(--color-ink)] shadow-[0_24px_70px_rgba(23,23,23,0.14)] sm:min-h-[520px] lg:min-h-[580px]">
+    <section
+  aria-label="Featured photography"
+  aria-roledescription="carousel"
+  className="px-4 pb-6 pt-1 sm:px-7 sm:pb-8 sm:pt-4 lg:px-10"
+>
+      <div className="relative isolate mx-auto min-h-[360px] max-w-[1200px] overflow-hidden rounded-[1.25rem] border border-[color-mix(in_srgb,var(--studio-champagne-gold)_28%,transparent)] bg-[var(--color-ink)] shadow-[0_24px_70px_rgba(23,23,23,0.14)] sm:min-h-[420px] lg:min-h-[480px]">
         {slides.map((item, index) => (
           <Image
             key={item.image}
@@ -38,7 +42,7 @@ export function HeroCarousel() {
             }`}
           />
         ))}
-        <div className="relative flex min-h-[480px] flex-col justify-center px-6 py-16 text-white sm:min-h-[520px] sm:px-10 lg:min-h-[580px] lg:px-14">
+        <div className="relative flex min-h-[360px] flex-col justify-center px-6 py-10 text-white sm:min-h-[420px] sm:px-10 sm:py-12 lg:min-h-[480px] lg:px-14">
           <div className={`${slide.textAlignment === "right" ? "ml-auto max-w-[16rem] sm:max-w-[25rem]" : "max-w-[25rem]"} [text-shadow:0_1px_4px_rgba(0,0,0,0.45)]`}>
             <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80 sm:text-xs">
               {slide.eyebrow}

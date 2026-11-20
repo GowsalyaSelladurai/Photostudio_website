@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PricingConfigurator } from "@/components/pricing/pricing-configurator";
 import { SectionHeading } from "@/components/ui/section-heading";
 
 import { AlbumProjectCreator } from "@/components/albums/AlbumProjectCreator";
@@ -57,17 +56,48 @@ export default function AlbumsPage() {
         id="album-pricing"
         className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24"
       >
-        <div className="mb-10">
-          <SectionHeading
-            eyebrow="Create something timeless"
-            title="Configure your album."
-            description="Choose the album size, number of pages and cover finish to calculate your estimated price."
-          />
+        <div className="mb-10 flex flex-col justify-between gap-8 md:flex-row md:items-end">
+          <div>
+            <SectionHeading
+              eyebrow="Create something timeless"
+              title="Configure your album."
+              description="Choose the album size, number of pages and cover finish to calculate your estimated price."
+            />
+            <p className="mt-3 text-xs text-[var(--color-muted)]">
+              Prices are illustrative INR demo estimates and are subject to confirmation.
+            </p>
+          </div>
 
-          <p className="mt-4 text-xs text-[var(--color-muted)]">
-            Prices are illustrative INR demo estimates and are subject to
-            confirmation.
-          </p>
+          {/* Luxury 3-Step Process Indicator (from reference design) */}
+          <div
+            className="flex items-center gap-3 self-start pb-2 md:self-end"
+            aria-label="Creation process steps"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#A67C4A] text-[11px] font-semibold text-white shadow-sm">
+                01
+              </span>
+              <span className="text-xs font-medium tracking-wide text-[var(--studio-deep-charcoal)]">
+                Album configuration
+              </span>
+            </div>
+
+            <div className="h-px w-6 bg-[var(--color-line)]" aria-hidden="true" />
+
+            <div className="flex items-center">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--color-line)] text-[11px] font-medium text-[var(--color-muted)]">
+                02
+              </span>
+            </div>
+
+            <div className="h-px w-6 bg-[var(--color-line)]" aria-hidden="true" />
+
+            <div className="flex items-center">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--color-line)] text-[11px] font-medium text-[var(--color-muted)]">
+                03
+              </span>
+            </div>
+          </div>
         </div>
 
         <AlbumProjectCreator />

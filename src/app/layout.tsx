@@ -7,7 +7,7 @@ import { FloatingContact } from "@/components/layout/floating-contact";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { LiquidLines } from "@/components/effects/liquid-lines";
-
+import { DroneShowBanner } from "@/components/home/drone-show-banner";
 import { studioConfig } from "@/config/studio.config";
 import "./globals.css";
 import "@/components/effects/liquid-lines.css";
@@ -47,6 +47,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="flex min-h-full flex-col">
+        <DroneShowBanner introOnly showIntro/>
         <LiquidLines />
         <a href="#main-content" className="skip-link">
           Skip to content

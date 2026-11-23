@@ -418,3 +418,666 @@ h6 {
 @utility animate-instagram-right {
   animation: instagram-right 85s linear infinite;
 }
+
+/* ==========================================
+   STUDIOFRAME - DRONE SHOW & INTRO BANNER
+========================================== */
+
+/* Drone intro section */
+.sf-drone-intro {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #171717;
+  color: #F5F0E8;
+}
+
+.sf-intro-background {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(184, 153, 112, 0.18), transparent 55%),
+    linear-gradient(135deg, #171717, #292522);
+}
+
+.sf-intro-stars {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.6;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff 50%, transparent 100%),
+    radial-gradient(2px 2px at 80% 20%, #e8c28f 50%, transparent 100%),
+    radial-gradient(1px 1px at 50% 70%, #fff 50%, transparent 100%);
+  background-size: 240px 240px;
+  animation: sfStarMove 35s linear infinite;
+}
+
+.sf-intro-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(184, 153, 112, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(184, 153, 112, 0.3) 1px, transparent 1px);
+  background-size: 70px 70px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.sf-intro-light {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rem;
+  height: 40rem;
+  border-radius: 50%;
+  background: rgba(184, 153, 112, 0.12);
+  filter: blur(100px);
+  transform: translate(-50%, -50%);
+  animation: sfGoldGlow 6s ease-in-out infinite alternate;
+}
+
+.sf-welcome-heading {
+  position: relative;
+  z-index: 2;
+  width: min(90%, 900px);
+  margin: auto;
+  padding: 8rem 0 5rem;
+  text-align: center;
+}
+
+.sf-welcome-eyebrow {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: #e8c28f;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  animation: sfWelcomeReveal 1s ease both;
+}
+
+.sf-welcome-heading h1 {
+  margin: 0;
+  color: #F5F0E8;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.sf-welcome-top {
+  display: block;
+  animation: sfWelcomeReveal 1.2s ease both;
+}
+
+.sf-welcome-brand {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #e8c28f;
+  animation: sfWelcomeReveal 1.5s ease both;
+}
+
+.sf-welcome-heading p {
+  max-width: 620px;
+  margin: 2rem auto 0;
+  color: rgba(245, 240, 232, 0.75);
+  font-size: 1.05rem;
+  animation: sfWelcomeReveal 1.7s ease both;
+}
+
+.sf-welcome-line {
+  width: 100px;
+  height: 1px;
+  margin: 2rem auto;
+  background: #B89970;
+  transform-origin: center;
+  animation: sfLineReveal 1.5s ease both;
+}
+
+.sf-intro-drone {
+  position: absolute;
+  z-index: 3;
+  top: 55%;
+  left: -15%;
+  width: clamp(100px, 15vw, 190px);
+  animation: sfDroneJourney 8s ease-in-out infinite;
+}
+
+.sf-intro-beam {
+  position: absolute;
+  top: 70%;
+  left: 45%;
+  width: 3px;
+  height: 220px;
+  background: linear-gradient(to bottom, rgba(232, 194, 143, 0.8), transparent);
+  filter: blur(3px);
+  transform: rotate(15deg);
+  transform-origin: top;
+}
+
+.sf-intro-photo {
+  position: absolute;
+  right: 10%;
+  bottom: 18%;
+  width: clamp(120px, 17vw, 230px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid rgba(232, 194, 143, 0.8);
+  box-shadow: 0 0 35px rgba(184, 153, 112, 0.3);
+  animation: sfPhotoIn 2s ease 1s both;
+}
+
+.sf-intro-photo img,
+.sf-banner-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sf-photo-caption {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0.5rem;
+  background: rgba(23, 23, 23, 0.7);
+  color: #F5F0E8;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.sf-intro-bottom {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  justify-content: space-between;
+  color: rgba(245, 240, 232, 0.6);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sf-intro-skip {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 5;
+  border: 1px solid rgba(232, 194, 143, 0.5);
+  border-radius: 999px;
+  padding: 0.6rem 1.2rem;
+  background: transparent;
+  color: #F5F0E8;
+  cursor: pointer;
+  transition: background 250ms ease, color 250ms ease;
+}
+
+.sf-intro-skip:hover {
+  background: #B89970;
+  color: #171717;
+}
+
+/* Drone homepage banner */
+.sf-drone-section {
+  position: relative;
+  overflow: hidden;
+  padding: 7rem 2rem;
+  background:
+    radial-gradient(ellipse at 70% 50%, rgba(184, 153, 112, 0.16), transparent 55%),
+    #171717;
+  color: #F5F0E8;
+  isolation: isolate;
+}
+
+.sf-banner-glow {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.sf-glow-one {
+  top: -10rem;
+  right: -5rem;
+  width: 30rem;
+  height: 30rem;
+  background: rgba(184, 153, 112, 0.2);
+  animation: sfGoldGlow 7s ease-in-out infinite alternate;
+}
+
+.sf-glow-two {
+  bottom: -15rem;
+  left: -10rem;
+  width: 35rem;
+  height: 35rem;
+  background: rgba(232, 194, 143, 0.1);
+  animation: sfGoldGlow 9s ease-in-out infinite alternate-reverse;
+}
+
+.sf-drone-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 4rem;
+  width: min(100%, 1200px);
+  margin: auto;
+}
+
+.sf-eyebrow {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: #e8c28f;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.sf-drone-content h2 {
+  margin: 0;
+  color: #F5F0E8;
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.sf-drone-content h2 span {
+  display: block;
+  color: #B89970;
+}
+
+.sf-drone-content > p {
+  max-width: 500px;
+  margin: 1.5rem 0;
+  color: rgba(245, 240, 232, 0.7);
+  font-size: 1rem;
+}
+
+.sf-drone-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.sf-upload-button,
+.sf-explore-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 999px;
+  padding: 0.8rem 1.6rem;
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 250ms ease,
+    color 250ms ease,
+    border-color 250ms ease,
+    transform 250ms ease;
+}
+
+.sf-upload-button {
+  border: 1px solid #B89970;
+  background: #B89970;
+  color: #171717;
+}
+
+.sf-upload-button:hover {
+  transform: translateY(-3px);
+  background: #e8c28f;
+}
+
+.sf-explore-button {
+  border: 1px solid rgba(245, 240, 232, 0.5);
+  background: transparent;
+  color: #F5F0E8;
+}
+
+.sf-explore-button:hover {
+  transform: translateY(-3px);
+  border-color: #B89970;
+  color: #e8c28f;
+}
+
+.sf-upload-message {
+  margin-top: 1rem;
+  color: #e8c28f;
+  font-size: 0.85rem;
+}
+
+.sf-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  color: rgba(245, 240, 232, 0.65);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sf-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9bc69b;
+  box-shadow: 0 0 10px #9bc69b;
+  animation: sfPulse 2s ease-in-out infinite;
+}
+
+.sf-drone-stage {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sf-orbit {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border: 1px solid rgba(184, 153, 112, 0.3);
+  border-radius: 50%;
+  transform: rotateX(65deg);
+}
+
+.sf-orbit-two {
+  width: 420px;
+  height: 420px;
+  border-color: rgba(184, 153, 112, 0.15);
+}
+
+.sf-banner-drone {
+  position: relative;
+  z-index: 2;
+  width: clamp(150px, 22vw, 260px);
+  animation: sfDroneHover 4s ease-in-out infinite;
+}
+
+.sf-banner-beam {
+  position: absolute;
+  top: 65%;
+  left: 50%;
+  z-index: 1;
+  width: 2px;
+  height: 170px;
+  background: linear-gradient(to bottom, rgba(232, 194, 143, 0.8), transparent);
+  filter: blur(2px);
+  transform: translateX(-50%);
+}
+
+.sf-banner-photo {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  z-index: 3;
+  width: clamp(120px, 15vw, 180px);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid #B89970;
+  box-shadow: 0 0 30px rgba(184, 153, 112, 0.35);
+  transform: translate(-50%, 0);
+  animation: sfPhotoIn 1.5s ease both;
+}
+
+.sf-projection-label {
+  position: absolute;
+  top: 95%;
+  left: 50%;
+  color: #e8c28f;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.sf-stage-caption {
+  position: absolute;
+  bottom: 0;
+  color: rgba(245, 240, 232, 0.55);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Drone animations */
+@keyframes sfDroneJourney {
+  0% {
+    left: -15%;
+    top: 55%;
+    transform: rotate(-8deg);
+  }
+  35% {
+    left: 35%;
+    top: 35%;
+    transform: rotate(5deg);
+  }
+  65% {
+    left: 60%;
+    top: 45%;
+    transform: rotate(-4deg);
+  }
+  100% {
+    left: 110%;
+    top: 30%;
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes sfDroneHover {
+  0%, 100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(3deg);
+  }
+}
+
+@keyframes sfWelcomeReveal {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sfGoldGlow {
+  from {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes sfLineReveal {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes sfLightReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sfBeamIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes sfPhotoIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sfStarMove {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 240px 240px;
+  }
+}
+
+@keyframes sfIntroFade {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes sfPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.3);
+  }
+}
+
+/* Tablet responsive */
+@media (max-width: 800px) {
+  .sf-drone-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .sf-drone-content {
+    text-align: center;
+  }
+
+  .sf-drone-content > p {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .sf-drone-actions {
+    justify-content: center;
+  }
+
+  .sf-drone-stage {
+    min-height: 350px;
+  }
+
+  .sf-intro-photo {
+    right: 5%;
+    bottom: 12%;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .sf-drone-section {
+    padding: 5rem 1.25rem;
+  }
+
+  .sf-drone-stage {
+    min-height: 300px;
+  }
+
+  .sf-orbit {
+    width: 230px;
+    height: 230px;
+  }
+
+  .sf-orbit-two {
+    width: 300px;
+    height: 300px;
+  }
+
+  .sf-intro-drone {
+    width: 100px;
+  }
+
+  .sf-welcome-heading {
+    padding-top: 7rem;
+  }
+
+  .sf-intro-photo {
+    width: 115px;
+    right: 1rem;
+    bottom: 10%;
+  }
+
+  .sf-intro-bottom {
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    font-size: 0.55rem;
+  }
+
+  .sf-intro-skip {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .sf-drone-actions {
+    flex-direction: column;
+  }
+
+  .sf-upload-button,
+  .sf-explore-button {
+    width: 100%;
+  }
+}
+
+/* Drone reduced-motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .sf-intro-stars,
+  .sf-welcome-brand,
+  .sf-banner-drone,
+  .sf-live-dot {
+    animation: none !important;
+  }
+
+  .sf-intro-drone {
+    animation: none !important;
+    left: 40%;
+  }
+} 
+
+

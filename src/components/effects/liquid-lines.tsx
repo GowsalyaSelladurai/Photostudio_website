@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef } from "react";
@@ -28,10 +27,8 @@ export function LiquidLines() {
 
     if (!canvas || !ctx) return;
 
-    if (
-      window.matchMedia("(pointer: coarse)").matches ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    // Respect the user's reduced-motion preference.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
@@ -68,14 +65,14 @@ export function LiquidLines() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
+    // Works for both mouse and touch movement.
     const handleMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch") return;
-
       mouse.previousX = mouse.x;
       mouse.previousY = mouse.y;
 
       mouse.x = event.clientX;
       mouse.y = event.clientY;
+
       mouse.active = true;
       mouse.moved = true;
 
@@ -86,6 +83,30 @@ export function LiquidLines() {
       });
 
       if (trail.length > 90) trail.shift();
+    };
+
+    // Start the effect immediately when touching the screen.
+    const handleDown = (event: PointerEvent) => {
+      if (event.pointerType === "touch") {
+        mouse.previousX = event.clientX;
+        mouse.previousY = event.clientY;
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+        mouse.active = true;
+        mouse.moved = false;
+
+        trail.push({
+          x: mouse.x,
+          y: mouse.y,
+          time: performance.now(),
+        });
+      }
+    };
+
+    // Stop adding to the trail when the finger is released.
+    const handleUp = () => {
+      mouse.active = false;
+      mouse.moved = false;
     };
 
     const handleLeave = () => {
@@ -345,7 +366,12 @@ export function LiquidLines() {
     resize();
 
     window.addEventListener("resize", resize);
+
+    // Desktop mouse + mobile touch.
     window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerdown", handleDown);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
     window.addEventListener("pointerleave", handleLeave);
 
     frame = requestAnimationFrame(animate);
@@ -355,6 +381,9 @@ export function LiquidLines() {
 
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerdown", handleDown);
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleUp);
       window.removeEventListener("pointerleave", handleLeave);
     };
   }, []);

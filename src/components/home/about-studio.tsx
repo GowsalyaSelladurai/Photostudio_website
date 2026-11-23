@@ -7,7 +7,7 @@ const stories = [
     title: "A Beautiful Beginning of Forever",
     location: "Coimbatore, Tamil Nadu",
     image:
-      "https://mysticstudios.in/wp-content/uploads/2026/05/coimbatore-mvs-mahal-wedding-photographer-00046-650x650.webp",
+        "https://eliteweddingstories.in/wp-content/uploads/2024/09/trichy-weddings--scaled.webp",
   },
   {
     category: "TRADITIONAL TAMIL WEDDING",

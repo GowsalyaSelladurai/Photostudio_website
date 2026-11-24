@@ -1,0 +1,420 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+
+  /* StudioFrame brand colors */
+  --studio-midnight-black: #171717;
+  --studio-deep-charcoal: #292522;
+  --studio-champagne-gold: #B89970;
+  --studio-ivory-white: #F5F0E8;
+  --studio-warm-beige: #E8DDCE;
+
+  /* Existing color aliases */
+  --color-paper: var(--studio-ivory-white);
+  --color-paper-deep: var(--studio-warm-beige);
+  --color-sand: var(--studio-warm-beige);
+  --color-line: color-mix(
+    in srgb,
+    var(--studio-champagne-gold) 38%,
+    transparent
+  );
+
+  --color-ink: var(--studio-midnight-black);
+  --color-muted: var(--studio-deep-charcoal);
+  --color-clay: var(--studio-deep-charcoal);
+  --color-clay-light: var(--studio-champagne-gold);
+
+  background: var(--studio-ivory-white);
+  color: var(--studio-midnight-black);
+}
+
+/* Tailwind theme variables */
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-heading);
+
+  /* StudioFrame colors */
+  --color-white: var(--studio-ivory-white);
+  --color-black: var(--studio-midnight-black);
+  --color-midnight: var(--studio-midnight-black);
+  --color-charcoal: var(--studio-deep-charcoal);
+  --color-champagne: var(--studio-champagne-gold);
+  --color-ivory: var(--studio-ivory-white);
+  --color-beige: var(--studio-warm-beige);
+}
+
+/* Global box sizing */
+* {
+  box-sizing: border-box;
+}
+
+/* HTML */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+/* Body typography */
+body {
+  margin: 0;
+  background: var(--studio-ivory-white);
+  color: var(--studio-midnight-black);
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Heading typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), serif;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+/* Text selection */
+::selection {
+  background: var(--studio-champagne-gold);
+  color: var(--studio-midnight-black);
+}
+
+/* Accessible keyboard focus */
+:focus-visible {
+  outline: 2px solid var(--studio-midnight-black);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--studio-champagne-gold);
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  z-index: 100;
+  left: 1rem;
+  top: 1rem;
+  transform: translateY(-200%);
+  border-radius: 9999px;
+  background: var(--studio-ivory-white);
+  padding: 0.75rem 1rem;
+  color: var(--studio-midnight-black);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Premium cards */
+.premium-card {
+  border: 1px solid var(--color-line);
+  background: var(--studio-ivory-white);
+  box-shadow: 0 12px 32px rgb(23 23 23 / 6%);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.premium-card:hover {
+  border-color: var(--studio-champagne-gold);
+  box-shadow: 0 18px 38px rgb(23 23 23 / 9%);
+}
+
+/* Form inputs */
+.premium-input {
+  min-height: 3rem;
+  width: 100%;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+  background: var(--studio-ivory-white);
+  padding: 0.75rem 1rem;
+  color: var(--studio-midnight-black);
+  font: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.premium-input::placeholder {
+  color: var(--studio-deep-charcoal);
+  opacity: 0.75;
+}
+
+.premium-input:focus {
+  border-color: var(--studio-champagne-gold);
+  box-shadow: 0 0 0 3px
+    color-mix(
+      in srgb,
+      var(--studio-champagne-gold) 28%,
+      transparent
+    );
+}
+
+.premium-input[aria-invalid="true"] {
+  border-color: var(--studio-champagne-gold);
+}
+
+/* Form errors */
+.field-error {
+  border-left: 2px solid var(--studio-champagne-gold);
+  padding-left: 0.5rem;
+  color: var(--studio-deep-charcoal);
+}
+
+/* ==========================================
+   STUDIOFRAME - ELECTRIC GALLERY BORDER
+========================================== */
+
+.gallery-electric-card {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  padding: 2px;
+  overflow: hidden;
+  border-radius: 14px;
+
+  background: rgba(184, 153, 112, 0.28);
+
+  box-shadow:
+    0 5px 20px rgb(23 23 23 / 6%),
+    0 0 0 1px rgb(184 153 112 / 12%);
+
+  transition:
+    transform 350ms ease,
+    box-shadow 350ms ease;
+}
+
+/* Animated electric border */
+.gallery-electric-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -100%;
+
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 250deg,
+    #9c7044 275deg,
+    #e8c28f 295deg,
+    #fff1d6 310deg,
+    #c08b4e 325deg,
+    transparent 345deg,
+    transparent 360deg
+  );
+
+  opacity: 0;
+  animation: electric-border-spin 3s linear infinite;
+  transition: opacity 300ms ease;
+}
+
+/* Cursor-following glow */
+.gallery-electric-card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  background: radial-gradient(
+    180px circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 226, 174, 0.85),
+    rgba(210, 158, 96, 0.35) 35%,
+    transparent 72%
+  );
+
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+/* Inner gallery image */
+.gallery-electric-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 11px;
+  background: var(--studio-warm-beige);
+}
+
+/* Hover effect */
+.gallery-electric-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 12px 30px rgb(23 23 23 / 13%),
+    0 0 12px rgb(184 153 112 / 28%),
+    0 0 28px rgb(184 153 112 / 17%);
+}
+
+.gallery-electric-card:hover::before,
+.gallery-electric-card:hover::after {
+  opacity: 1;
+}
+
+/* Border rotation */
+@keyframes electric-border-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Keyboard accessibility */
+.gallery-electric-card:focus-visible {
+  outline: 2px solid var(--studio-champagne-gold);
+  outline-offset: 5px;
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================
+   STUDIOFRAME - INTERACTIVE GOLDEN TOUCH GLOW
+========================================== */
+
+.camera-strip-item {
+  position: relative !important;
+  isolation: isolate !important;
+  border: 2px solid rgba(184, 153, 112, 0.45) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 0 transparent !important;
+  transition:
+    border-color 250ms ease,
+    box-shadow 250ms ease,
+    transform 250ms ease !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mouse hover and touch press */
+.camera-strip-item:hover,
+.camera-strip-item:active,
+.camera-strip-item:focus-visible {
+  z-index: 30 !important;
+  border-color: #ffe2ae !important;
+
+  box-shadow:
+    0 0 5px #fff1d6,
+    0 0 12px rgba(255, 218, 158, 1),
+    0 0 24px rgba(218, 171, 103, 0.95),
+    0 0 40px rgba(184, 137, 70, 0.75) !important;
+
+  transform: translateY(-4px) scale(1.025);
+}
+
+/* Inner golden light */
+.camera-strip-item:hover::after,
+.camera-strip-item:active::after,
+.camera-strip-item:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 14px rgba(255, 226, 174, 0.55);
+}
+
+/* Keyboard accessibility */
+.camera-strip-item:focus-visible {
+  outline: 2px solid #d9b77f !important;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-strip-item {
+    transition: none !important;
+  }
+}
+
+@keyframes contactImageZoom {
+  from {
+    opacity: 0;
+    transform: scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes contactTextReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-image-animate {
+  animation: contactImageZoom 1.8s ease-out both;
+}
+
+.contact-text-animate {
+  animation: contactTextReveal 1s ease-out 0.3s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-image-animate,
+  .contact-text-animate {
+    animation: none;
+  }
+}
+
+/* ==========================================
+   STUDIOFRAME - INSTAGRAM MARQUEE ANIMATIONS
+========================================== */
+
+@keyframes instagram-left {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes instagram-right {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@utility animate-instagram-left {
+  animation: instagram-left 75s linear infinite;
+}
+
+@utility animate-instagram-right {
+  animation: instagram-right 85s linear infinite;
+}
